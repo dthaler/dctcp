@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<!-- This line is a comment that won't appear in the generated document. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd"[
+      <!-- For each RFC you want to reference, add a line like below and then
+           see the references section at the end.  This line tells the
+           tool to pull the reference from the database. -->
+      <!ENTITY rfc2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+      <!-- For each Internet Draft you want to reference, add a line like
+           below and then see the references section at the end. -->
+      <!ENTITY I-D.ietf-6man-uri-zoneid PUBLIC ''
+          'http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-6man-uri-zoneid.xml'>
+      ]>
+<?rfc toc='yes' ?>
+<?rfc symrefs='yes' ?>
+<?rfc sortrefs='no'?>
+<?rfc compact='yes'?>
+<!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
+<!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
+
+<rfc docName="draft-bensley-tcpm-dctcp-00" ipr="trust200902" category="std">
+  <front>
+    <title abbrev='Abbreviated Title Goes Here'>Full Title Goes Here</title>
+    <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
+      <organization>Microsoft</organization>
+      <address>
+        <postal>
+          <street>One Microsoft Way</street>
+          <city>Redmond</city>
+          <region>WA</region>
+          <code>98052</code>
+          <country>USA</country>
+        </postal>
+        <email>sbens@microsoft.com</email>
+      </address>
+    </author>
+    <author initials='L.' surname='Eggert' fullname='Lars Eggert'>
+      <organization>Netapp</organization>
+      <address>
+        <postal>
+          <street>123 Some Street</street>
+          <city>Anytown</city>
+          <region>State</region>
+          <code>Zip</code>
+          <country>USA</country>
+        </postal>
+        <email>email@example.com</email>
+      </address>
+    </author>
+    <author initials='D.' surname='Thaler' fullname='Dave Thaler'>
+      <organization>Microsoft</organization>
+      <address>
+        <phone>+1 425 703 8835</phone>
+        <email>dthaler@microsoft.com</email>
+      </address>
+    </author>
+    <date year='2014' />
+    <area>Transport</area>
+    <keyword>Some keyword</keyword>
+    <keyword>Another keyword</keyword>
+    <abstract>
+      <t> Some abstract goes here...
+      </t>
+      <t> Second paragraph of abstract.  Blah blah blah...
+      </t>
+    </abstract>
+  </front>
+  
+  <middle>
+    <section title='Introduction'>
+      <t> Some introduction might go here...
+      </t>
+      <t> Second paragraph of introduction... Here's a cross reference
+          to <xref target='RFC2119'/> and 
+          <xref target='I-D.ietf-6man-uri-zoneid'/>. 
+          And here's a bulleted list:
+      </t>
+      <t><list style='symbols'> 
+          <t> First bullet.
+          </t>
+          <t> Second bullet.
+          </t>
+        </list>
+      </t>
+      <t> Now here's a sample ASCII art figure.
+      </t>
+      <figure align="center" anchor="processes">
+          <artwork><![CDATA[
+              +------------+
+              |  Holder of |     1. Generation
+              | identifier +<---------+
+              +----+-------+          |
+                   |                  | Match
+                   |                  v/
+                   |          +-------+-------+
+                   +----------+ Repository of |
+                   |          |  identifiers  |
+                   |          +-------+-------+
+   2. Distribution |                  ^\
+                   |                  | Match
+                   v                  |
+         +---------+-------+          |
+         |      User of    |          |
+         |    identifier   +----------+
+         +-----------------+    3. Use
+        ]]></artwork>
+        <postamble>Typical Identifier Processes
+        </postamble>
+      </figure>
+    </section>
+
+    <section title='Some Level 1 Title' anchor='somesection'>
+      <t> Here's a numbered list:
+      </t>
+      <t><list style='numbers'>
+         <t> First numbered item.
+         </t>
+         <t> Second numbered item.
+         </t>
+      </list>
+      </t>
+
+      <section title='Some Level 2 Title' anchor='somesubsection'>
+        <t> Here's a glossary style list of terms.
+        </t>
+        <t><list style='hanging' hangIndent='2'>
+          <t hangText='Widget:'> <vspace />
+            Some description of a widget.
+          </t> 
+          <t hangText='Foobar:'> <vspace />
+            Some definition of a foobar.
+          </t>
+        </list> 
+        </t>
+      </section>
+
+      <section title='Another Level 2 Title'>
+        <t> This section needs no anchor since there's no cross-reference
+            to it from elsewhere, unlike <xref target='somesection'/>
+            and <xref target='somesubsection'/>.
+        </t>
+        <t> Here's a sample packet diagram.
+        </t>
+        <figure align="center" anchor="tlv">
+            <artwork align="left"><![CDATA[
+                         1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |     Type      |    Length     |            Value              |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            ]]></artwork>
+            <postamble>Type Length Value Packet</postamble>
+        </figure>
+      </section>
+    </section>
+
+    <section title='IANA Considerations'>
+      <t> This document has no actions for IANA.
+      </t>
+    </section>
+
+    <section title='Security Considerations'>
+      <t> Security considerations go here.
+      </t>
+    </section>
+    
+    <section title='Acknowledgements'>
+      <t> Thanks to various people.
+      </t>
+    </section>
+  </middle>
+
+  <back>
+    <references title='Normative References'>
+      &rfc2119;
+      &I-D.ietf-6man-uri-zoneid;
+    </references>
+    
+    <references title='Informative References'>
+      <!-- Here's an example of a reference to something that's not an RFC
+           or an Internet Draft:
+        -->
+      <reference anchor='W3CWebArch' target='http://www.w3.org/TR/webarch/'>
+        <front>
+          <title>Architecture of the World Wide Web, Volume One</title>
+          <author>
+            <organization abbrev="W3C TAG">W3C Technical Architecture Group</organization>
+          </author>
+          <date year="2004" month="December"/>
+        </front>
+      </reference>
+    </references>
+
+    <section title="Here's An Appendix">
+      <t> Some content.
+      </t>
+    </section>
+
+  </back>
+</rfc>
