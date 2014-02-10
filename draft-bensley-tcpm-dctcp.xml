@@ -34,16 +34,16 @@
       </address>
     </author>
     <author initials='L.' surname='Eggert' fullname='Lars Eggert'>
-      <organization>Netapp</organization>
+      <organization>NetApp</organization>
       <address>
         <postal>
-          <street>123 Some Street</street>
-          <city>Anytown</city>
-          <region>State</region>
-          <code>Zip</code>
-          <country>USA</country>
+          <street>Sonnenallee 1</street>
+          <city>Kirchheim</city>
+          <code>85551</code>
+          <country>Germany</country>
         </postal>
-        <email>email@example.com</email>
+        <phone>+49 151 120 55791</phone>
+        <email>lars@netapp.com</email>
       </address>
     </author>
     <author initials='D.' surname='Thaler' fullname='Dave Thaler'>
@@ -64,17 +64,17 @@
       </t>
     </abstract>
   </front>
-  
+
   <middle>
     <section title='Introduction'>
       <t> Some introduction might go here...
       </t>
       <t> Second paragraph of introduction... Here's a cross reference
-          to <xref target='RFC2119'/> and 
-          <xref target='I-D.ietf-6man-uri-zoneid'/>. 
+          to <xref target='RFC2119'/> and
+          <xref target='I-D.ietf-6man-uri-zoneid'/>.
           And here's a bulleted list:
       </t>
-      <t><list style='symbols'> 
+      <t><list style='symbols'>
           <t> First bullet.
           </t>
           <t> Second bullet.
@@ -125,11 +125,11 @@
         <t><list style='hanging' hangIndent='2'>
           <t hangText='Widget:'> <vspace />
             Some description of a widget.
-          </t> 
+          </t>
           <t hangText='Foobar:'> <vspace />
             Some definition of a foobar.
           </t>
-        </list> 
+        </list>
         </t>
       </section>
 
@@ -162,7 +162,7 @@
       <t> Security considerations go here.
       </t>
     </section>
-    
+
     <section title='Acknowledgements'>
       <t> Thanks to various people.
       </t>
@@ -174,7 +174,7 @@
       &rfc2119;
       &I-D.ietf-6man-uri-zoneid;
     </references>
-    
+
     <references title='Informative References'>
       <!-- Here's an example of a reference to something that's not an RFC
            or an Internet Draft:
