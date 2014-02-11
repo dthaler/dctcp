@@ -4,6 +4,7 @@
       <!-- For each RFC you want to reference, add a line like below and then
            see the references section at the end.  This line tells the
            tool to pull the reference from the database. -->
+      <!ENTITY rfc0793 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.0793.xml">
       <!ENTITY rfc2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
       <!ENTITY rfc3168 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3168.xml">
       <!ENTITY rfc5681 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5681.xml">
@@ -69,6 +70,7 @@
   <middle>
     <section title='Introduction'>
       <t> Paraphrase SigComm.
+          And reference <xref target="RFC0793"/>.
       </t>
     </section>
 
@@ -237,6 +239,7 @@
 
   <back>
     <references title='Normative References'>
+      &rfc0793;
       &rfc2119;
       &rfc5681;
     </references>
