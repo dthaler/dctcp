@@ -130,12 +130,11 @@
       <section title='Processing Congestion Indications on the Sender'>
         <t> The sender estimates the fraction of sent bytes that encountered congestion. The current estimate is stored in a new
         TCP state variable, DCTCP.Alpha, which is intialized to 1 and updated as follows:
-        </t>
-        <t> DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
+          <list>
+            <t> DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M </t>
+          </list>
         </t>
         <t> where
-        </t>
-        <t>
           <list style='symbols'>
             <t> g is the estimation gain, a real number between 0 and 1. The selection of g is left to the implementation.
             </t>
@@ -145,8 +144,10 @@
           </list>
         </t>
         <t> Whenever the TCP congestion estimate is updated, the sender also updates the TCP congestion window as follows:
-        </t>
-        <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
+          <list>
+            <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
+            </t>
+          </list>
         </t>
         <t> Thus, when there is no congestion at all, Alpha equals zero, and the congestion window is left unchanged. When there
         is total congestion, Alpha equals one, and the congestion window is reduced by half. Lower leves of congestion will result
@@ -170,22 +171,43 @@
         </t>
         <t>
           <list style='numbers'>
-            <t> Compute the bytes acknowledged: BytesAcked = SEG.ACK - SND.UNA
+            <t> Compute the bytes acknowledged:
+              <list style='none'>
+                <t> BytesAcked = SEG.ACK - SND.UNA </t>
+              </list>
             </t>
-            <t> Update the bytes sent: DCTCP.BytesSent += BytesAcked
+            <t> Update the bytes sent:
+              <list style='none'>
+                <t> DCTCP.BytesSent += BytesAcked </t>
+              </list>
             </t>
-            <t> If the ECE flag is set, update the bytes marked: DCTCP.BytesMarked += BytesAcked
+            <t> If the ECE flag is set, update the bytes marked:
+              <list style='none'>
+                <t> DCTCP.BytesMarked += BytesAcked </t>
+              </list>
             </t>
             <t> If the sequence number is less than or equal to DCTCP.WindowEnd, then stop processing. Otherwise, we've reached
             the end of the observation window, so proceed to update the congestion estimate.
             </t>
-            <t> Compute the congestion for the current window: M = DCTCP.BytesMarked / DCTCP.BytesSent
+            <t> Compute the congestion for the current window:
+              <list style='none'>
+                <t> M = DCTCP.BytesMarked / DCTCP.BytesSent </t>
+              </list>
             </t>
-            <t> Update the congestion estimate: DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
+            <t> Update the congestion estimate:
+              <list style='none'>
+                <t> DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M </t>
+              </list>
             </t>
-            <t> Set the end of the new window: DCTCP.WindowEnd = SND.NXT
+            <t> Set the end of the new window:
+              <list style='none'>
+                <t> DCTCP.WindowEnd = SND.NXT </t>
+              </list>
             </t>
-            <t> Reset the byte counters: DCTCP.BytesSent = DCTCP.BytesMarked = 0
+            <t> Reset the byte counters:
+              <list style='none'>
+                <t> DCTCP.BytesSent = DCTCP.BytesMarked = 0 </t>
+              </list>
             </t>
           </list>
         </t>
@@ -252,8 +274,53 @@
       <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
-          <author>
-            <organization abbrev="MSR">Microsoft Research</organization>
+          <author initials="M." surname="Alizadeh" fullname="Mohammad Alizadeh">
+            <organization abbrev="Stanford"> Stanford University </organization>
+            <address>
+              <email> alizade@stanford.edu </email>
+            </address>
+          </author>
+          <author initials="A." surname="Greenberg" fullname="Albert Greenberg">
+            <organization abbrev="MSR"> Microsoft Research </organization>
+            <address>
+              <email> albert@microsoft.com </email>
+            </address>
+          </author>
+          <author initials="D.A." surname="Maltz" fullname="David A. Maltz">
+            <organization abbrev="MSR"> Microsoft Research </organization>
+            <address>
+              <email> dmaltz@microsoft.com </email>
+            </address>
+          </author>
+          <author initials="J." surname="Padhye" fullname="Jitendra Padhye">
+            <organization abbrev="MSR"> Microsoft Research </organization>
+            <address>
+              <email> padhye@microsoft.com </email>
+            </address>
+          </author>
+          <author initials="P." surname="Patel" fullname="Parveen Patel">
+            <organization abbrev="MSR"> Microsoft Research </organization>
+            <address>
+              <email> parveenp@microsoft.com </email>
+            </address>
+          </author>
+          <author initials="B." surname="Prabhakar" fullname="Balaji Prabhakar">
+            <organization abbrev="Stanford"> Stanford University </organization>
+            <address>
+              <email> balaji@stanford.edu </email>
+            </address>
+          </author>
+          <author initials="S." surname="Sengupta" fullname="Sudipta Sengupta">
+            <organization abbrev="MSR"> Microsoft Research </organization>
+            <address>
+              <email> sudipta@microsoft.com </email>
+            </address>
+          </author>
+          <author initials="M." surname="Sridharan" fullname="Murari Sridharan">
+            <organization abbrev="MSR"> Microsoft Research </organization>
+            <address>
+              <email> muraris@microsoft.com </email>
+            </address>
           </author>
           <date year="2010" month="December"/>
         </front>
