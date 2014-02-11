@@ -80,9 +80,10 @@
     <section title='DCTCP Algorithm'>
       <t> There are three components involved in the DCTCP algorithm:
       </t>
-      <t><list style='symbols'>
+      <t>
+        <list style='symbols'>
           <t> The switch (or other intermediate device on the network) detects congestion and sets the Congestion Encountered (CE)
-   codepoint in the IP header.
+          codepoint in the IP header.
           </t>
           <t> The receiver echoes the congestion information back to the sender using the ECN-Echo (ECE) flag in the TCP header.
           </t>
@@ -92,10 +93,100 @@
       </t>
 
       <section title='Marking Congestion on the Switch'>
+        <t> The switch indicates congestion to the end nodes by setting the CE codepoint in the IP header as specified in
+        [RFC3168]. For example, the switch may be configured with a congestion threshold. When a packet arrives at the switch and
+        the switch's queue length is greater than the congestion threshold, the switch sets the CE codepoint in the packet.
+        However, the actual algorithm for marking congestion is an implementation detail of the switch and will generally not be
+        known to the sender and receiver.
+        </t>
       </section>
       <section title='Echoing Congestion Information on the Receiver'>
+        <t> According to [RFC3168], the receiver sets the ECE flag if any of the packets being acknowledged had the CE code point
+        set. The receiver then continues to set the ECE flag until it receives a packet with the Congestion Window Reduced (CWR)
+        flag set. However, the DCTCP algorithm requires more detailed congestion information. In particular, the sender must be
+        able to determine the number of sent bytes that encountered congestion. Thus, the scheme described in [RFC3168] does not
+        suffice. 
+        </t>
+        <t> One possible solution is to ACK every packet and set the ECE flag in the ACK if and only if the CE code point was set
+        in the packet being acknowledged. However, this prevents the use of delayed ACKs, which are an important performance
+        optimization in datacenters. Instead, we introduce a new Boolean TCP state variable, DCTCP Congestion Encountered
+        (DCTCP.CE), which is initialized to false and stored in the TCB. When sending an ACK, the ECE flag is set if and only if
+        DCTCP.CE is true. When receiving packets, the CE codepoint is processed as follows:
+        </t>
+        <t><list style='numbers'>
+           <t> If the CE codepoint is set and DCTCP.CE is false, send an ACK for any previously unacknowledged packets and set
+           DCTCP.CE to true.
+           </t>
+           <t> If the CE codepoint is not set and DCTCP.CE is true, send an ACK for any previously unacknowledged packets and set
+           DCTCP.CE to false.
+           </t>
+           <t> Otherwise, the CE codepoint is ignored.
+           </t>
+           </list>
+        </t>
       </section>
-      <section title='Reacting to Congestion Indications on the Sender'>
+      <section title='Processing Congestion Indications on the Sender'>
+        <t> The sender estimates the fraction of sent bytes that encountered congestion. The current estimate is stored in a new
+        TCP state variable, DCTCP.Alpha, which is intialized to 1 and updated as follows:
+        </t>
+        <t> DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
+        </t>
+        <t> where
+        </t>
+        <t>
+          <list style='symbols'>
+            <t> g is the estimation gain, a real number between 0 and 1. The selection of g is left to the implementation.
+            </t>
+            <t> M is the fraction of sent bytes that encountered congestion during the previous observation window, where the 
+            observation window is chosen to be approximately the Round Trip Time (RTT).
+            </t>
+          </list>
+        </t>
+        <t> Whenever the TCP congestion estimate is updated, the sender also updates the TCP congestion window as follows:
+        </t>
+        <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
+        </t>
+        <t> Thus, when there is no congestion at all, Alpha equals zero, and the congestion window is left unchanged. When there
+        is total congestion, Alpha equals one, and the congestion window is reduced by half. Lower leves of congestion will result
+        in correspondingly lesser reductions to the congestion window.
+        </t>
+        <t> In order to update DCTCP.Alpha, we introduce three additional TCP state variables:
+        </t>
+        <t>
+          <list style='symbols'>
+            <t> DCTCP.WindowEnd - The TCP sequence number threshold for beginning a new observation window -- initialized to
+            SND.UNA.
+            </t>
+            <t> DCTCP.BytesSent - The number of bytes sent during the current window -- initialized to zero.
+            </t>
+            <t> DCTCP.BytesMarked - The number of bytes sent during the current window that encountered congestion -- initialized
+            to zero.
+            </t>
+          </list>
+        </t>
+        <t> The congestion estimator on the sender processes received acceptable ACKs as follows:
+        </t>
+        <t>
+          <list style='numbers'>
+            <t> Compute the bytes acknowledged: BytesAcked = SEG.ACK - SND.UNA
+            </t>
+            <t> Update the bytes sent: DCTCP.BytesSent += BytesAcked
+            </t>
+            <t> If the ECE flag is set, update the bytes marked: DCTCP.BytesMarked += BytesAcked
+            </t>
+            <t> If the sequence number is less than or equal to DCTCP.WindowEnd, then stop processing. Otherwise, we've reached
+            the end of the observation window, so proceed to update the congestion estimate.
+            </t>
+            <t> Compute the congestion for the current window: M = DCTCP.BytesMarked / DCTCP.BytesSent
+            </t>
+            <t> Update the congestion estimate: DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
+            </t>
+            <t> Set the end of the new window: DCTCP.WindowEnd = SND.NXT
+            </t>
+            <t> Reset the byte counters: DCTCP.BytesSent = DCTCP.BytesMarked = 0
+            </t>
+          </list>
+        </t>
       </section>
     </section>
 
