@@ -78,8 +78,25 @@
     </section>
 
     <section title='DCTCP Algorithm'>
-      <t> I'll document the Windows implementation here, not the algo in the SigComm paper.
+      <t> There are three components involved in the DCTCP algorithm:
       </t>
+      <t><list style='symbols'>
+          <t> The switch (or other intermediate device on the network) detects congestion and sets the Congestion Encountered (CE)
+   codepoint in the IP header.
+          </t>
+          <t> The receiver echoes the congestion information back to the sender using the ECN-Echo (ECE) flag in the TCP header.
+          </t>
+          <t> The sender reacts to the congestion indication by reducing the TCP congestion window (cwnd).
+          </t>
+        </list>
+      </t>
+
+      <section title='Marking Congestion on the Switch'>
+      </section>
+      <section title='Echoing Congestion Information on the Receiver'>
+      </section>
+      <section title='Reacting to Congestion Indications on the Sender'>
+      </section>
     </section>
 
     <section title='Implementation Issues'>
