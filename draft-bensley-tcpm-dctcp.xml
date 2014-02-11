@@ -5,10 +5,10 @@
            see the references section at the end.  This line tells the
            tool to pull the reference from the database. -->
       <!ENTITY rfc2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+      <!ENTITY rfc3168 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3168.xml">
+      <!ENTITY rfc5681 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5681.xml">
       <!-- For each Internet Draft you want to reference, add a line like
            below and then see the references section at the end. -->
-      <!ENTITY I-D.ietf-6man-uri-zoneid PUBLIC ''
-          'http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-6man-uri-zoneid.xml'>
       ]>
 <?rfc toc='yes' ?>
 <?rfc symrefs='yes' ?>
@@ -19,7 +19,7 @@
 
 <rfc docName="draft-bensley-tcpm-dctcp-00" ipr="trust200902" category="std">
   <front>
-    <title abbrev='Abbreviated Title Goes Here'>Full Title Goes Here</title>
+    <title abbrev='DCTCP'>Datacenter TCP (DCTCP): TCP Congestion Control for Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
       <organization>Microsoft</organization>
       <address>
@@ -30,6 +30,7 @@
           <code>98052</code>
           <country>USA</country>
         </postal>
+        <phone>+1 425 703 5570</phone>
         <email>sbens@microsoft.com</email>
       </address>
     </author>
@@ -67,90 +68,47 @@
 
   <middle>
     <section title='Introduction'>
-      <t> Some introduction might go here...
+      <t> Paraphrase SigComm.
       </t>
-      <t> Second paragraph of introduction... Here's a cross reference
-          to <xref target='RFC2119'/> and
-          <xref target='I-D.ietf-6man-uri-zoneid'/>.
-          And here's a bulleted list:
-      </t>
-      <t><list style='symbols'>
-          <t> First bullet.
-          </t>
-          <t> Second bullet.
-          </t>
-        </list>
-      </t>
-      <t> Now here's a sample ASCII art figure.
-      </t>
-      <figure align="center" anchor="processes">
-          <artwork><![CDATA[
-              +------------+
-              |  Holder of |     1. Generation
-              | identifier +<---------+
-              +----+-------+          |
-                   |                  | Match
-                   |                  v/
-                   |          +-------+-------+
-                   +----------+ Repository of |
-                   |          |  identifiers  |
-                   |          +-------+-------+
-   2. Distribution |                  ^\
-                   |                  | Match
-                   v                  |
-         +---------+-------+          |
-         |      User of    |          |
-         |    identifier   +----------+
-         +-----------------+    3. Use
-        ]]></artwork>
-        <postamble>Typical Identifier Processes
-        </postamble>
-      </figure>
     </section>
 
-    <section title='Some Level 1 Title' anchor='somesection'>
-      <t> Here's a numbered list:
+    <section title='Design Goals'>
+      <t> Paraphrase SigComm.
       </t>
-      <t><list style='numbers'>
-         <t> First numbered item.
-         </t>
-         <t> Second numbered item.
-         </t>
-      </list>
-      </t>
+    </section>
 
-      <section title='Some Level 2 Title' anchor='somesubsection'>
-        <t> Here's a glossary style list of terms.
-        </t>
-        <t><list style='hanging' hangIndent='2'>
-          <t hangText='Widget:'> <vspace />
-            Some description of a widget.
+    <section title='DCTCP Algorithm'>
+      <t> I'll document the Windows implementation here, not the algo in the SigComm paper.
+      </t>
+    </section>
+
+    <section title='Implementation Issues'>
+      <t><list style='symbols'>
+          <t> How does the host decide to use DCTCP?
           </t>
-          <t hangText='Foobar:'> <vspace />
-            Some definition of a foobar.
+          <t> Selecting the estimation gain.
+          </t>
+          <t> Single-ended DCTCP
           </t>
         </list>
-        </t>
-      </section>
+      </t>
+    </section>
 
-      <section title='Another Level 2 Title'>
-        <t> This section needs no anchor since there's no cross-reference
-            to it from elsewhere, unlike <xref target='somesection'/>
-            and <xref target='somesubsection'/>.
-        </t>
-        <t> Here's a sample packet diagram.
-        </t>
-        <figure align="center" anchor="tlv">
-            <artwork align="left"><![CDATA[
-                         1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |     Type      |    Length     |            Value              |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            ]]></artwork>
-            <postamble>Type Length Value Packet</postamble>
-        </figure>
-      </section>
+    <section title='Deployment Issues'>
+      <t><list style='symbols'>
+          <t> Switch must support ECN.
+          </t>
+          <t> Configuration of marking threshold on switch.
+          </t>
+          <t> Interop with systems that don't support DCTCP, i.e., one host chooses DCTCP and the other doesn't.
+          </t>
+        </list>
+      </t>
+    </section>
+
+    <section title='Security Considerations'>
+      <t> If we can't come up with something for this section, we'll delete.
+      </t>
     </section>
 
     <section title='IANA Considerations'>
@@ -158,13 +116,13 @@
       </t>
     </section>
 
-    <section title='Security Considerations'>
-      <t> Security considerations go here.
+    <section title='Conclusions'>
+      <t> Paraphrase SigComm.
       </t>
     </section>
 
     <section title='Acknowledgements'>
-      <t> Thanks to various people.
+      <t> Acknowledge the original researchers.
       </t>
     </section>
   </middle>
@@ -172,28 +130,23 @@
   <back>
     <references title='Normative References'>
       &rfc2119;
-      &I-D.ietf-6man-uri-zoneid;
+      &rfc5681;
     </references>
 
     <references title='Informative References'>
       <!-- Here's an example of a reference to something that's not an RFC
            or an Internet Draft:
         -->
-      <reference anchor='W3CWebArch' target='http://www.w3.org/TR/webarch/'>
+      &rfc3168;
+      <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
         <front>
-          <title>Architecture of the World Wide Web, Volume One</title>
+          <title>Data Center TCP (DCTCP)</title>
           <author>
-            <organization abbrev="W3C TAG">W3C Technical Architecture Group</organization>
+            <organization abbrev="MSR">Microsoft Research</organization>
           </author>
-          <date year="2004" month="December"/>
+          <date year="2010" month="December"/>
         </front>
       </reference>
     </references>
-
-    <section title="Here's An Appendix">
-      <t> Some content.
-      </t>
-    </section>
-
   </back>
 </rfc>
