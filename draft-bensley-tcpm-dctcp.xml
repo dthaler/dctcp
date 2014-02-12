@@ -131,7 +131,8 @@
         <t> One possible solution is to ACK every packet and set the ECE flag in the ACK if and only if the CE code point was set
         in the packet being acknowledged. However, this prevents the use of delayed ACKs, which are an important performance
         optimization in datacenters. Instead, we introduce a new Boolean TCP state variable, DCTCP Congestion Encountered
-        (DCTCP.CE), which is initialized to false and stored in the TCB. When sending an ACK, the ECE flag is set if and only if
+        (DCTCP.CE), which is initialized to false and stored in the 
+        Transmission Control Block (TCB). When sending an ACK, the ECE flag is set if and only if
         DCTCP.CE is true. When receiving packets, the CE codepoint is processed as follows:
           <list style='numbers'>
            <t> If the CE codepoint is set and DCTCP.CE is false, send an ACK for any previously unacknowledged packets and set
@@ -171,7 +172,7 @@
         is total congestion, Alpha equals one, and the congestion window is reduced by half. Lower levels of congestion will result
         in correspondingly lesser reductions to the congestion window.
         </t>
-        <t> In order to update DCTCP.Alpha, we make use of the TCP state variables defined in <xref target="RFC0793"/>. We also
+        <t> In order to update DCTCP.Alpha, we make use of the TCP state variables defined in <xref target="RFC0793"/>, and
         introduce three additional TCP state variables:
           <list style='symbols'>
             <t> DCTCP.WindowEnd - The TCP sequence number threshold for beginning a new observation window -- initialized to
@@ -279,11 +280,10 @@
     <references title='Normative References'>
       &rfc0793;
       &rfc3168;
-      &rfc5681;
     </references>
 
     <references title='Informative References'>
-      &rfc3168;
+      &rfc5681;
       <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
