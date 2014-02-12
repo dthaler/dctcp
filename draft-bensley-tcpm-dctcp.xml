@@ -1,15 +1,8 @@
 <?xml version="1.0"?>
-<!-- This line is a comment that won't appear in the generated document. -->
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd"[
-      <!-- For each RFC you want to reference, add a line like below and then
-           see the references section at the end.  This line tells the
-           tool to pull the reference from the database. -->
       <!ENTITY rfc0793 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.0793.xml">
-      <!ENTITY rfc2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
       <!ENTITY rfc3168 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3168.xml">
       <!ENTITY rfc5681 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5681.xml">
-      <!-- For each Internet Draft you want to reference, add a line like
-           below and then see the references section at the end. -->
       ]>
 <?rfc toc='yes' ?>
 <?rfc symrefs='yes' ?>
@@ -70,7 +63,7 @@
   <middle>
     <section title='Introduction'>
       <t> Paraphrase SigComm.
-          And reference <xref target="RFC0793"/>.
+          And reference <xref target="RFC0793"/> and <xref target="RFC5681"/>.
       </t>
     </section>
 
@@ -85,7 +78,7 @@
       <t>
         <list style='symbols'>
           <t> The switch (or other intermediate device on the network) detects congestion and sets the Congestion Encountered (CE)
-          codepoint in the IP header.
+              codepoint in the IP header.
           </t>
           <t> The receiver echoes the congestion information back to the sender using the ECN-Echo (ECE) flag in the TCP header.
           </t>
@@ -95,18 +88,20 @@
       </t>
 
       <section title='Marking Congestion on the Switch'>
-        <t> The switch indicates congestion to the end nodes by setting the CE codepoint in the IP header as specified in
-        [RFC3168]. For example, the switch may be configured with a congestion threshold. When a packet arrives at the switch and
+        <t> The switch indicates congestion to the end nodes by setting the CE codepoint in the IP header as specified in Section 5 of <xref target="RFC3168"/>.
+        For example, the switch may be configured with a congestion threshold. When a packet arrives at the switch and
         the switch's queue length is greater than the congestion threshold, the switch sets the CE codepoint in the packet.
         However, the actual algorithm for marking congestion is an implementation detail of the switch and will generally not be
         known to the sender and receiver.
         </t>
       </section>
+
       <section title='Echoing Congestion Information on the Receiver'>
-        <t> According to [RFC3168], the receiver sets the ECE flag if any of the packets being acknowledged had the CE code point
+        <t> According to Section 6.1.3 of <xref target="RFC3168"/>, the
+            receiver sets the ECE flag if any of the packets being acknowledged had the CE code point
         set. The receiver then continues to set the ECE flag until it receives a packet with the Congestion Window Reduced (CWR)
         flag set. However, the DCTCP algorithm requires more detailed congestion information. In particular, the sender must be
-        able to determine the number of sent bytes that encountered congestion. Thus, the scheme described in [RFC3168] does not
+        able to determine the number of sent bytes that encountered congestion. Thus, the scheme described in <xref target="RFC3168"/> does not
         suffice. 
         </t>
         <t> One possible solution is to ACK every packet and set the ECE flag in the ACK if and only if the CE code point was set
@@ -129,7 +124,7 @@
       </section>
       <section title='Processing Congestion Indications on the Sender'>
         <t> The sender estimates the fraction of sent bytes that encountered congestion. The current estimate is stored in a new
-        TCP state variable, DCTCP.Alpha, which is intialized to 1 and updated as follows:
+        TCP state variable, DCTCP.Alpha, which is initialized to 1 and updated as follows:
           <list>
             <t> DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M </t>
           </list>
@@ -150,7 +145,7 @@
           </list>
         </t>
         <t> Thus, when there is no congestion at all, Alpha equals zero, and the congestion window is left unchanged. When there
-        is total congestion, Alpha equals one, and the congestion window is reduced by half. Lower leves of congestion will result
+        is total congestion, Alpha equals one, and the congestion window is reduced by half. Lower levels of congestion will result
         in correspondingly lesser reductions to the congestion window.
         </t>
         <t> In order to update DCTCP.Alpha, we introduce three additional TCP state variables:
@@ -239,7 +234,7 @@
     </section>
 
     <section title='Security Considerations'>
-      <t> If we can't come up with something for this section, we'll delete.
+      <t> Come up with something for this section... (can't delete).
       </t>
     </section>
 
@@ -254,7 +249,9 @@
     </section>
 
     <section title='Acknowledgements'>
-      <t> Acknowledge the original researchers.
+      <t> The DCTCP algorithm was originally proposed and analyzed in <xref target="DCTCP10"/> by Mohammad Alizadeh,
+          Albert Greenberg, Dave Maltz, Jitu Padhye, Parveen Patel, Balaji Prabhakar, Sudipta Sengupta, and
+          Murari Sridharan.
       </t>
     </section>
   </middle>
@@ -262,14 +259,11 @@
   <back>
     <references title='Normative References'>
       &rfc0793;
-      &rfc2119;
+      &rfc3168;
       &rfc5681;
     </references>
 
     <references title='Informative References'>
-      <!-- Here's an example of a reference to something that's not an RFC
-           or an Internet Draft:
-        -->
       &rfc3168;
       <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
         <front>
