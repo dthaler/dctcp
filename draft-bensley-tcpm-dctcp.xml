@@ -14,9 +14,9 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-bensley-tcpm-dctcp-01" ipr="trust200902" category="std">
+<rfc docName="draft-bensley-tcpm-dctcp-01" ipr="trust200902" category="info">
   <front>
-    <title abbrev='DCTCP'>Datacenter TCP (DCTCP): TCP Congestion Control for Datacenters</title>
+    <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
       <organization>Microsoft</organization>
       <address>
@@ -58,7 +58,8 @@
     <keyword>DCTCP</keyword>
     <keyword>congestion control</keyword>
     <abstract>
-      <t> This memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic. DCTCP
+      <t> This memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic,
+      as implemented in Windows Server 2012. DCTCP
       enhances Explicit Congestion Notification (ECN) processing to estimate the fraction of bytes that encounter congestion,
       rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion window based on this
       estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches.
@@ -100,6 +101,9 @@
       encounter congestion, rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion
       window based on this estimate. This method achieves high burst tolerance, low latency, and high throughput with
       shallow-buffered switches.
+      </t>
+      <t>
+      This document describes DCTCP as implemented in by Microsoft Windows Server 2012.
       </t>
     </section>
 
