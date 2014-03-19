@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd"[
   <!ENTITY rfc0793 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.0793.xml">
+  <!ENTITY rfc2018 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2018.xml">
   <!ENTITY rfc2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
   <!ENTITY rfc3168 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3168.xml">
   <!ENTITY rfc5681 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5681.xml">
@@ -177,19 +178,10 @@
             See <xref target="implissues"/> for further considerations.
             </t>
             <t> M is the fraction of sent bytes that encountered congestion during the previous observation window, where the
-            observation window is chosen to be approximately the Round Trip Time (RTT).
-            <cref source="LE">What is meant by "approximately" here?</cref>
+            observation window is chosen to be approximately the Round Trip Time (RTT). In particular, an observation window
+            ends when all the sent bytes in flight at the beginning of the window have been acknowledged.
             </t>
           </list>
-        </t>
-        <t> Whenever the TCP congestion estimate is updated, the sender MUST also update cwnd as follows:
-          <list>
-            <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
-            </t>
-          </list>
-        </t>
-        <t> Thus, when no sent byte experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent bytes experienced congestion, DCTCP.Alpha equals one, and cwnd is reduced by half. Lower levels of congestion will result
-        in correspondingly smaller reductions to cwnd.
         </t>
         <t> In order to update DCTCP.Alpha, the TCP state variables defined in <xref target="RFC0793"/> are used, and
         three additional TCP state variables are introduced:
@@ -206,8 +198,7 @@
         </t>
         <t> The congestion estimator on the sender MUST process acceptable ACKs as follows:
           <list style='numbers'>
-            <t> Compute the bytes acknowledged:
-            <cref source="LE">SACK information is not being included here?</cref>
+            <t> Compute the bytes acknowledged (TCP SACK options <xref target="RFC2018"/> are ignored):
               <list style='none'>
                 <t> BytesAcked = SEG.ACK - SND.UNA </t>
               </list>
@@ -247,6 +238,20 @@
             </t>
           </list>
         </t>
+        <t> Rather than always halving the congestion window as described in <xref target="RFC3168"/>, when the sender receives an
+        indication of congestion, the sender MUST update cwnd as follows:
+          <list>
+            <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
+            </t>
+          </list>
+        </t>
+        <t> Thus, when no sent byte experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent
+        bytes experienced congestion, DCTCP.Alpha equals one, and cwnd is reduced by half. Lower levels of congestion will result
+        in correspondingly smaller reductions to cwnd.
+        </t>
+        <t> Just as specified in <xref target="RFC3168"/>, TCP should not react to congestion indications more than once every
+        window of data. The setting of the "Congestion Window Reduced" (CWR) bit is also exactly as per <xref target="RFC3168"/>.
+        </t>
       </section>
     </section>
 
@@ -270,8 +275,37 @@
       <xref target='DCTCP10' /> provides a theoretical basis for selecting the congestion threshold, but as with estimation gain,
       it may be more practical to rely on experimentation or simply to use the default configuration of the device.
       </t>
-      <t> DCTCP requires changes on both the sender and the receiver, so in a heterogeneous datacenter, all the endpoints should
-      support DCTCP and should be configured to use it. A variant of DCTCP that can be deployed unilaterally and only requires standard ECN behavior has been described in <xref target="ODCTCP"/>, but requires additional experimental evaluation.
+      <t> DCTCP requires changes on both the sender and the receiver, so both endpoints must support DCTCP. Furthermore, DCTCP
+      provides no mechanism for negotiating its use, so both endpoints must be configured through some out-of-band mechanism to
+      use DCTCP. A variant of DCTCP that can be deployed unilaterally and only requires standard ECN behavior has been described
+      in <xref target="ODCTCP"/>, but requires additional experimental evaluation.
+      </t>
+    </section>
+
+    <section title='Known Issues'>
+      <t> DCTCP relies on the sender's ability to reconstruct the stream of CE codepoints received by the remote endpoint. To
+      accomplish this, DCTCP avoids using a single ACK packet to acknowledge segments received both with and without the CE
+      codepoint set. However, if an ACK packet is dropped, it's possible that a subsequent ACK will indeed acknowledge a mix of
+      CE and non-CE segments. This will, of course, result in a less accurate congestion estimate. There are some potential
+      mitigations:
+        <list style="symbols">
+          <t> Even with a degraded congestion estimate, DCTCP may still perform better than <xref target="RFC3168"/>.
+          </t>
+          <t> If the estimation gain is small relative to the packet loss rate, the estimate may not be degraded much.
+          </t>
+          <t> If packet losses mostly occur under heavy congestion, most drops will occur during an unbroken string of CE packets,
+          and the estimate will be unaffected.
+          </t>
+        </list>
+      However, the affect of packet drops on DCTCP under real world conditions has not been analyzed.
+      </t>
+      <t> DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
+      required to ensure that DCTCP is not used with non-DCTCP endpoints. The affect of using DCTCP with a standard ECN endpoint
+      has been analyzed in <xref target="ODCTCP"/>. Furthermore, it's possible that other implementations may also modify
+      <xref target="RFC3168"/> behavior without negotiation, causing further interoperability issues.
+      </t>
+      <t> Much like standard TCP, DCTCP is biased against flows with longer RTTs. A method for improving the fairness of DCTCP
+      has been proposed in <xref target="ADCTCP"/>, but requires additional experimental evaluation.
       </t>
     </section>
 
@@ -299,6 +333,7 @@
   <back>
     <references title='Normative References'>
       &rfc0793;
+      &rfc2018;
       &rfc2119;
       &rfc3168;
     </references>
@@ -370,7 +405,30 @@ One-Sided Datacenter TCP</title>
         </front>
         <seriesInfo name="M.S. Thesis," value="Keio University"/>
       </reference>
-
+      <reference anchor="ADCTCP" target="http://simula.stanford.edu/~alizade/Site/DCTCP_files/dctcp_analysis-full.pdf">
+        <front>
+          <title> Analysis of DCTCP: Stability, Convergence, and Fairness </title>
+          <author initials="M." surname="Alizadeh" fullname="Mohammad Alizadeh">
+            <organization abbrev="Stanford"> Stanford University </organization>
+            <address>
+              <email> alizade@stanford.edu </email>
+            </address>
+          </author>
+          <author initials="A." surname="Javanmard" fullname="Adel Javanmard">
+            <organization abbrev="Stanford"> Stanford University </organization>
+            <address>
+              <email> adelj@stanford.edu </email>
+            </address>
+          </author>
+          <author initials="B." surname="Prabhakar" fullname="Balaji Prabhakar">
+            <organization abbrev="Stanford"> Stanford University </organization>
+            <address>
+              <email> balaji@stanford.edu </email>
+            </address>
+          </author>
+          <date year="2011" month="June"/>
+        </front>
+      </reference>
     </references>
   </back>
 </rfc>
