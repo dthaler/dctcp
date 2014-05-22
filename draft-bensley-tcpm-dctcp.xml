@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd"[
-  <!ENTITY rfc0793 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.0793.xml">
-  <!ENTITY rfc2018 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2018.xml">
-  <!ENTITY rfc2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
-  <!ENTITY rfc3168 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3168.xml">
-  <!ENTITY rfc5681 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5681.xml">
+  <!ENTITY rfc0793 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.0793.xml">
+  <!ENTITY rfc2018 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2018.xml">
+  <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
+  <!ENTITY rfc3168 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3168.xml">
+  <!ENTITY rfc5681 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 ]>
 <?rfc toc='yes' ?>
 <?rfc symrefs='yes' ?>
@@ -53,7 +53,7 @@
         <email>dthaler@microsoft.com</email>
       </address>
     </author>
-    <date year='2014' />
+    <date/>
     <area>Transport</area>
     <keyword>TCP</keyword>
     <keyword>ECN</keyword>
