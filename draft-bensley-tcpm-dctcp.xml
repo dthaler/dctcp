@@ -134,7 +134,6 @@
         its queue length is greater than the congestion threshold, the switch sets the CE codepoint in the packet.
         However, the actual algorithm for marking congestion is an implementation detail of the switch and will generally not be
         known to the sender and receiver.
-        <cref source="LE">Can we say anything about a recommended switch marking algorithm or configuration?</cref>
         </t>
       </section>
 
