@@ -15,7 +15,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-bensley-tcpm-dctcp-01" ipr="trust200902" category="info">
+<rfc docName="draft-bensley-tcpm-dctcp-02" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -106,6 +106,9 @@
       </t>
       <t>
       This document describes DCTCP as implemented in Microsoft Windows Server 2012.
+      Since publication of the first versions of this document, the Linux <xref target="LINUX"/>
+      and FreeBSD <xref target="FREEBSD"/> operating systems have also implemented support for DCTCP in a way
+      that is believed to follow this document.
       </t>
     </section>
 
@@ -427,6 +430,24 @@ One-Sided Datacenter TCP</title>
             </address>
           </author>
           <date year="2011" month="June"/>
+        </front>
+      </reference>
+      <reference anchor="LINUX" target="https://git.kernel.org/cgit/linux/kernel/git/davem/net-next.git/commit/?id=e3118e8359bb7c59555aca60c725106e6d78c5ce">
+        <front>
+          <title>Linux DCTCP patch</title>
+          <author initials="D." surname="Borkmann">
+            <organization />
+          </author>
+          <date year="2014"/>
+        </front>
+      </reference>
+      <reference anchor="FREEBSD" target="https://github.com/freebsd/freebsd/commit/8ad879445281027858a7fa706d13e458095b595f">
+        <front>
+          <title>DCTCP (Data Center TCP) implementation</title>
+          <author initials="M." surname="Kato">
+            <organization />
+          </author>
+          <date year="2015"/>
         </front>
       </reference>
     </references>
