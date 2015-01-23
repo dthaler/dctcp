@@ -15,7 +15,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-bensley-tcpm-dctcp-02" ipr="trust200902" category="info">
+<rfc docName="draft-bensley-tcpm-dctcp-03" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -438,6 +438,9 @@ One-Sided Datacenter TCP</title>
           <author initials="D." surname="Borkmann">
             <organization />
           </author>
+          <author initials="F." surname="Westphal">
+            <organization />
+          </author>
           <date year="2014"/>
         </front>
       </reference>
@@ -445,6 +448,9 @@ One-Sided Datacenter TCP</title>
         <front>
           <title>DCTCP (Data Center TCP) implementation</title>
           <author initials="M." surname="Kato">
+            <organization />
+          </author>
+          <author initials="H." surname="Panchasara">
             <organization />
           </author>
           <date year="2015"/>
