@@ -17,7 +17,7 @@
 
 <rfc docName="draft-bensley-tcpm-dctcp-03" ipr="trust200902" category="info">
   <front>
-    <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
+    <title abbrev='DCTCP'>Microsoft's Datacenter TCP (DCTCP): TCP Congestion Control for Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
       <organization>Microsoft</organization>
       <address>
@@ -135,8 +135,10 @@
         <t> The switch indicates congestion to the end nodes by setting the CE codepoint in the IP header as specified in Section 5 of <xref target="RFC3168"/>.
         For example, the switch may be configured with a congestion threshold. When a packet arrives at the switch and
         its queue length is greater than the congestion threshold, the switch sets the CE codepoint in the packet.
+        For example, Section 3.4 of <xref target="DCTCP10"/> suggests threshold marking with a threshold K > (RTT * C)/7, where C is the sending rate in packets per second.
         However, the actual algorithm for marking congestion is an implementation detail of the switch and will generally not be
-        known to the sender and receiver.
+        known to the sender and receiver. Therefore, sender and receiver MUST NOT assume that a particular
+        marking algorithm is implemented by the switching fabric.
         </t>
       </section>
 
@@ -331,7 +333,7 @@
           Murari Sridharan.
       </t>
       <t>
-        Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation programme 2014-2018 under grant agreement No. 644866.
+        Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation program 2014-2018 under grant agreement No. 644866.
         This document reflects only the authors' views and the European Commission is not responsible for any use that may be made of the information it contains.
       </t>
     </section>
