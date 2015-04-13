@@ -17,7 +17,7 @@
 
 <rfc docName="draft-bensley-tcpm-dctcp-03" ipr="trust200902" category="info">
   <front>
-    <title abbrev='DCTCP'>Microsoft's Datacenter TCP (DCTCP): TCP Congestion Control for Datacenters</title>
+    <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
       <organization>Microsoft</organization>
       <address>
