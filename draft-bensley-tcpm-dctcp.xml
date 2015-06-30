@@ -6,6 +6,7 @@
   <!ENTITY rfc3168 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3168.xml">
   <!ENTITY rfc5562 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5562.xml">
   <!ENTITY rfc5681 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
+  <!ENTITY rfc6982 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6982.xml">
 ]>
 <?rfc toc='yes' ?>
 <?rfc symrefs='yes' ?>
@@ -117,12 +118,6 @@
       encounter congestion, rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion
       window based on this estimate. This method achieves high burst tolerance, low latency, and high throughput with
       shallow-buffered switches.
-      </t>
-      <t>
-      This document describes DCTCP as implemented in Microsoft Windows Server 2012 and Microsoft Windows Server 2012 R2.
-      Since publication of the first versions of this document, the Linux <xref target="LINUX"/>
-      and FreeBSD <xref target="FREEBSD"/> operating systems have also implemented support for DCTCP in a way
-      that is believed to follow this document.
       </t>
     </section>
 
@@ -274,8 +269,8 @@
         </t>
       </section>
 
-      <section title='Handling of SYN, SYN-ACK and RST packets'>
-        <t> <xref target="RFC3168"/> states that “A host MUST NOT set ECT on SYN or SYN-ACK packets.” <xref target="RFC5562"/>
+      <section title='Handling of SYN, SYN-ACK and RST Packets'>
+        <t> <xref target="RFC3168"/> states that "A host MUST NOT set ECT on SYN or SYN-ACK packets." <xref target="RFC5562"/>
         proposes setting ECT on SYN-ACK packets, but maintains the restriction of no ECT on SYN packets. Both these RFCs prohibit
         ECT in SYN packets due to security concerns regarding malicious SYN packets with ECT set. These RFCs, however, are intended
         for general Internet use, and do not directly apply to a controlled datacenter deployment. The switching fabric can drop TCP
@@ -295,7 +290,7 @@
       <t> The implementation must also decide when to use DCTCP. Datacenter servers may need to communicate with endpoints outside
       the datacenter, where DCTCP is unsuitable or unsupported. Thus, a global configuration setting to enable DCTCP will
       generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012
-      also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under
+      also supports automatic selection of DCTCP if the estimated RTT is less than 10 ms and ECN is successfully negotiated, under
       the assumption that if the RTT is low, then the two endpoints are likely on the same datacenter network.
       </t>
     </section>
@@ -309,7 +304,7 @@
       <t> DCTCP requires changes on both the sender and the receiver, so both endpoints must support DCTCP. Furthermore, DCTCP
       provides no mechanism for negotiating its use, so both endpoints must be configured through some out-of-band mechanism to
       use DCTCP. A variant of DCTCP that can be deployed unilaterally and only requires standard ECN behavior has been described
-      in <xref target="ODCTCP"/>, but requires additional experimental evaluation.
+      in <xref target="ODCTCP"/><xref target="BSDCAN"/>, but requires additional experimental evaluation.
       </t>
     </section>
 
@@ -332,11 +327,24 @@
       </t>
       <t> DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
       required to ensure that DCTCP is not used with non-DCTCP endpoints. The affect of using DCTCP with a standard ECN endpoint
-      has been analyzed in <xref target="ODCTCP"/>. Furthermore, it's possible that other implementations may also modify
+      has been analyzed in <xref target="ODCTCP"/><xref target="BSDCAN"/>. Furthermore, it's possible that other implementations may also modify
       <xref target="RFC3168"/> behavior without negotiation, causing further interoperability issues.
       </t>
       <t> Much like standard TCP, DCTCP is biased against flows with longer RTTs. A method for improving the fairness of DCTCP
       has been proposed in <xref target="ADCTCP"/>, but requires additional experimental evaluation.
+      </t>
+    </section>
+
+    <section title='Implementation Status'>
+      <t>
+        This section documents the implementation status of the specification
+        in this document, as recommended by <xref target="RFC6982"/>.
+      </t>
+      <t>
+      This document describes DCTCP as implemented in Microsoft Windows Server 2012.
+      Since publication of the first versions of this document, the Linux <xref target="LINUX"/>
+      and FreeBSD <xref target="FREEBSD"/> operating systems have also implemented support for DCTCP in a way
+      that is believed to follow this document.
       </t>
     </section>
 
@@ -359,7 +367,7 @@
           Murari Sridharan.
       </t>
       <t>
-        Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation program 2014-2018 under grant agreement No. 644866.
+        Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation program 2014-2018 under grant agreement No. 644866 ("SSICLOPS").
         This document reflects only the authors' views and the European Commission is not responsible for any use that may be made of the information it contains.
       </t>
     </section>
@@ -376,7 +384,8 @@
     <references title='Informative References'>
       &rfc5681;
       &rfc5562;
-      <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
+      &rfc6982;
+      <reference anchor='DCTCP10' target='http://dl.acm.org/citation.cfm?doid=1851182.1851192'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
           <author initials="M." surname="Alizadeh" fullname="Mohammad Alizadeh">
@@ -427,8 +436,9 @@
               <email> muraris@microsoft.com </email>
             </address>
           </author>
-          <date year="2010" month="December"/>
+          <date year="2010" month="August"/>
         </front>
+        <seriesInfo name="" value="Proc. ACM SIGCOMM 2010 Conference (SIGCOMM 10)"/>
       </reference>
       <reference anchor="ODCTCP" target="http://eggert.org/students/kato-thesis.pdf">
         <front>
@@ -439,9 +449,31 @@ One-Sided Datacenter TCP</title>
           </author>
           <date year="2014"/>
         </front>
-        <seriesInfo name="M.S. Thesis," value="Keio University"/>
+        <seriesInfo name="" value="M.S. Thesis, Keio University"/>
       </reference>
-      <reference anchor="ADCTCP" target="http://simula.stanford.edu/~alizade/Site/DCTCP_files/dctcp_analysis-full.pdf">
+      <reference anchor="BSDCAN" target="https://www.bsdcan.org/2015/schedule/events/559.en.html">
+        <front>
+          <title>Extensions to FreeBSD Datacenter TCP for Incremental Deployment Support</title>
+          <author initials="M." surname="Kato">
+            <organization />
+          </author>
+          <author initials="L." surname="Eggert">
+            <organization />
+          </author>
+          <author initials="A." surname="Zimmermann">
+            <organization />
+          </author>
+          <author initials="R." surname="van Meter">
+            <organization />
+          </author>
+          <author initials="H." surname="Tokuda">
+            <organization />
+          </author>
+          <date month="June" year="2015"/>
+        </front>
+        <seriesInfo name="" value="BSDCan 2015"/>
+      </reference>
+      <reference anchor="ADCTCP" target="https://dl.acm.org/citation.cfm?id=1993753">
         <front>
           <title> Analysis of DCTCP: Stability, Convergence, and Fairness </title>
           <author initials="M." surname="Alizadeh" fullname="Mohammad Alizadeh">
@@ -464,6 +496,7 @@ One-Sided Datacenter TCP</title>
           </author>
           <date year="2011" month="June"/>
         </front>
+        <seriesInfo name="" value="Proc. ACM SIGMETRICS Joint International Conference on Measurement and Modeling of Computer Systems (SIGMETRICS 11)"/>
       </reference>
       <reference anchor="LINUX" target="https://git.kernel.org/cgit/linux/kernel/git/davem/net-next.git/commit/?id=e3118e8359bb7c59555aca60c725106e6d78c5ce">
         <front>
@@ -498,8 +531,9 @@ One-Sided Datacenter TCP</title>
               <email> glenn.judd@morganstanley.com </email>
             </address>
           </author>
-          <date year="2015"/>
+          <date month="May" year="2015"/>
         </front>
+          <seriesInfo name="" value="Proc. 12th USENIX Symposium on Networked Systems Design and Implementation (NSDI 15)"/>
       </reference>
     </references>
   </back>
