@@ -4,6 +4,7 @@
   <!ENTITY rfc2018 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2018.xml">
   <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
   <!ENTITY rfc3168 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3168.xml">
+  <!ENTITY rfc5562 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5562.xml">
   <!ENTITY rfc5681 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 ]>
 <?rfc toc='yes' ?>
@@ -15,7 +16,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-bensley-tcpm-dctcp-03" ipr="trust200902" category="info">
+<rfc docName="draft-bensley-tcpm-dctcp-04" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -53,6 +54,20 @@
         <email>dthaler@microsoft.com</email>
       </address>
     </author>
+    <author initials='P.' surname='Balasubramanian' fullname='Praveen Balasubramanian'>
+      <organization>Microsoft</organization>
+      <address>
+        <phone>+1 425 538 2782</phone>
+        <email>pravb@microsoft.com</email>
+      </address>
+    </author>
+    <author initials='G.' surname='Judd' fullname='Glenn Judd'>
+      <organization>Morgan Stanley</organization>
+      <address>
+        <phone>+1 </phone>
+        <email>glenn.judd@morganstanley.com</email>
+      </address>
+    </author>
     <date/>
     <area>Transport</area>
     <keyword>TCP</keyword>
@@ -60,8 +75,7 @@
     <keyword>DCTCP</keyword>
     <keyword>congestion control</keyword>
     <abstract>
-      <t> This memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic,
-      as implemented in Windows Server 2012. DCTCP
+      <t> This memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic. DCTCP
       enhances Explicit Congestion Notification (ECN) processing to estimate the fraction of bytes that encounter congestion,
       rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion window based on this
       estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches.
@@ -105,7 +119,7 @@
       shallow-buffered switches.
       </t>
       <t>
-      This document describes DCTCP as implemented in Microsoft Windows Server 2012.
+      This document describes DCTCP as implemented in Microsoft Windows Server 2012 and Microsoft Windows Server 2012 R2.
       Since publication of the first versions of this document, the Linux <xref target="LINUX"/>
       and FreeBSD <xref target="FREEBSD"/> operating systems have also implemented support for DCTCP in a way
       that is believed to follow this document.
@@ -170,6 +184,7 @@
            </list>
         </t>
       </section>
+
       <section title='Processing Congestion Indications on the Sender' anchor='senderprocessing'>
         <t> The sender estimates the fraction of sent bytes that encountered congestion. The current estimate is stored in a new
         TCP state variable, DCTCP.Alpha, which is initialized to 1 and MUST be updated as follows:
@@ -258,6 +273,17 @@
         window of data. The setting of the "Congestion Window Reduced" (CWR) bit is also exactly as per <xref target="RFC3168"/>.
         </t>
       </section>
+
+      <section title='Handling of SYN, SYN-ACK and RST packets'>
+        <t> <xref target="RFC3168"/> states that “A host MUST NOT set ECT on SYN or SYN-ACK packets.” <xref target="RFC5562"/>
+        proposes setting ECT on SYN-ACK packets, but maintains the restriction of no ECT on SYN packets. Both these RFCs prohibit
+        ECT in SYN packets due to security concerns regarding malicious SYN packets with ECT set. These RFCs, however, are intended
+        for general Internet use, and do not directly apply to a controlled datacenter deployment. The switching fabric can drop TCP
+        packets that do not have the ECT set in the IP header. If SYN and SYN-ACK packets for DCTCP connections are non-ECT they will
+        be dropped with high probability. For DCTCP connections SYN, SYN-ACK and RST packets are sent with ECT set.
+        </t>
+      </section>
+
     </section>
 
     <section title='Implementation Issues' anchor="implissues">
@@ -269,8 +295,8 @@
       <t> The implementation must also decide when to use DCTCP. Datacenter servers may need to communicate with endpoints outside
       the datacenter, where DCTCP is unsuitable or unsupported. Thus, a global configuration setting to enable DCTCP will
       generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012
-      also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec, under the assumption that if the RTT
-      is low, then the two endpoints are likely on the same datacenter network.
+      also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under
+      the assumption that if the RTT is low, then the two endpoints are likely on the same datacenter network.
       </t>
     </section>
 
@@ -349,6 +375,7 @@
 
     <references title='Informative References'>
       &rfc5681;
+      &rfc5562;
       <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
@@ -458,6 +485,18 @@ One-Sided Datacenter TCP</title>
           </author>
           <author initials="H." surname="Panchasara">
             <organization />
+          </author>
+          <date year="2015"/>
+        </front>
+      </reference>
+      <reference anchor="MORGANSTANLEY" target="https://www.usenix.org/conference/nsdi15/technical-sessions/presentation/judd">
+        <front>
+          <title>Attaining the Promise and Avoiding the Pitfalls of TCP in the Datacenter</title>
+          <author initials="G." surname="Judd" fullname="Glenn Judd">
+            <organization abbrev="MS"> Morgan Stanley </organization>
+            <address>
+              <email> glenn.judd@morganstanley.com </email>
+            </address>
           </author>
           <date year="2015"/>
         </front>
