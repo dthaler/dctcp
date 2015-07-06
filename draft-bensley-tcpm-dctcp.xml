@@ -6,7 +6,6 @@
   <!ENTITY rfc3168 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3168.xml">
   <!ENTITY rfc5562 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5562.xml">
   <!ENTITY rfc5681 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
-  <!ENTITY rfc6982 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6982.xml">
 ]>
 <?rfc toc='yes' ?>
 <?rfc symrefs='yes' ?>
@@ -77,7 +76,7 @@
     <keyword>congestion control</keyword>
     <abstract>
       <t> This memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic. DCTCP
-      enhances Explicit Congestion Notification (ECN) processing to estimate the fraction of bytes that encounter congestion,
+      uses improved Explicit Congestion Notification (ECN) processing to estimate the fraction of bytes that encounter congestion,
       rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion window based on this
       estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches.
       </t>
@@ -111,13 +110,24 @@
       </t>
       <t> <xref target="RFC3168"/> describes a mechanism for using Explicit Congestion Notification (ECN) from the switch for early
       detection of congestion, rather than waiting for segment loss to occur. However, this method only detects the presence of
-      congestion, not the extent. In the presence of mild congestion, it reduces the TCP congestion window too aggressively and
+      congestion, not the extent. In the presence of mild congestion, the TCP congestion window is reduced too aggressively and
       unnecessarily affects the throughput of long flows.
       </t>
-      <t> Datacenter TCP (DCTCP) enhances ECN processing to estimate the fraction of bytes that
+      <t> Datacenter TCP (DCTCP) improvises upon traditional ECN processing by estimating the fraction of bytes that
       encounter congestion, rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion
       window based on this estimate. This method achieves high burst tolerance, low latency, and high throughput with
       shallow-buffered switches.
+      </t>
+      <t>
+      This document describes DCTCP as implemented in Microsoft Windows Server 2012 and Microsoft Windows Server 2012 R2.
+      Since publication of the first versions of this document, the Linux <xref target="LINUX"/>
+      and FreeBSD <xref target="FREEBSD"/> operating systems have also implemented support for DCTCP in a way
+      that is believed to follow this document.
+      </t>
+      <t>
+      It is recommended that DCTCP be deployed in a datacenter environment where the endpoints and the switching fabric are under a single
+      administrative domain. Deployment issues around coexistence of DCTCP and conventional TCP, and lack of a negotiating mechanism between
+      sender and receiver, and possible mitigations are also discussed.
       </t>
     </section>
 
@@ -254,7 +264,7 @@
           </list>
         </t>
         <t> Rather than always halving the congestion window as described in <xref target="RFC3168"/>, when the sender receives an
-        indication of congestion, the sender MUST update cwnd as follows:
+        indication of congestion (ECE), the sender MUST update cwnd as follows:
           <list>
             <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
             </t>
@@ -269,13 +279,13 @@
         </t>
       </section>
 
-      <section title='Handling of SYN, SYN-ACK and RST Packets'>
-        <t> <xref target="RFC3168"/> states that "A host MUST NOT set ECT on SYN or SYN-ACK packets." <xref target="RFC5562"/>
+      <section title='Handling of SYN, SYN-ACK, RST packets'>
+        <t> <xref target="RFC3168"/> rerquires that compliant TCP MUST NOT set ECT on SYN or SYN-ACK packets. <xref target="RFC5562"/>
         proposes setting ECT on SYN-ACK packets, but maintains the restriction of no ECT on SYN packets. Both these RFCs prohibit
         ECT in SYN packets due to security concerns regarding malicious SYN packets with ECT set. These RFCs, however, are intended
         for general Internet use, and do not directly apply to a controlled datacenter deployment. The switching fabric can drop TCP
         packets that do not have the ECT set in the IP header. If SYN and SYN-ACK packets for DCTCP connections are non-ECT they will
-        be dropped with high probability. For DCTCP connections SYN, SYN-ACK and RST packets are sent with ECT set.
+        be dropped with high probability. For DCTCP connections the sender SHOULD set ECT for SYN, SYN-ACK and RST packets.
         </t>
       </section>
 
@@ -290,29 +300,60 @@
       <t> The implementation must also decide when to use DCTCP. Datacenter servers may need to communicate with endpoints outside
       the datacenter, where DCTCP is unsuitable or unsupported. Thus, a global configuration setting to enable DCTCP will
       generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012
-      also supports automatic selection of DCTCP if the estimated RTT is less than 10 ms and ECN is successfully negotiated, under
+      also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under
       the assumption that if the RTT is low, then the two endpoints are likely on the same datacenter network.
+      </t>
+      <t> To prevent incast throughput collapse the minimum RTO (MinRTO) used by TCP should be lowered significantly. The default value of
+      MinRTO in Windows is 300 msec which is much greater than the maximum latencies inside a datacenter. Server 2012 onwards the MinRTO
+      value is configurable allowing values as low as 10 msec on a per subnet or per TCP port basis or even globally. A lower MinRTO value
+      requires corresponding a lower delayed ACK timeout on the receiver. It is recommended that the implementation allow configuration of
+      lower timeouts for DCTCP connections.
+      </t>
+      <t> In the same vein, it is also recommended that the implementation allow configuration of restarting the cwnd of
+      idle DCTCP connections as described in <xref target="RFC5681"/> since network conditions change rapidly in the datacenter. The
+      implementation can also allow configuration for discarding the value of DCTCP.Alpha after cwnd restart and timeouts.
+      </t>
+      <t> <xref target="RFC3168"/> forbids the ECN-marking of pure ACK packets because of the inability of TCP to mitigate ACK-path
+      congestion and protocol-wise preferential treatment by routers. However dropping pure ACKs rather than ECN marking them is
+      disadvantageous in traffic scenarios typical in the datacenter. Because of the prevalence of bursty traffic patterns which involve
+      transient congestion, the dropping of ACKS causes subsequent retransmission. It is recommended that the implementation a configuration
+      knob that forces ECT on TCP pure ACK packets.
       </t>
     </section>
 
     <section title='Deployment Issues'>
+      <t> DCTCP and conventional TCP congestion control does not coexist well. In DCTCP, the marking threshold is set very low
+      value to reduce queueing delay, thus a relatively small amount of congestion will exceed the marking threshold. During such periods
+      of congestion, conventional TCP will suffer packet losses and quickly scale back cwnd. DCTCP, on the other hand, will use the fraction
+      of marked packets to scale back cwnd. Thus rate reduction in DCTCP will be much lower than that of conventional TCP, and DCTCP traffic
+      will dominate conventional TCP traffic traversing the same link. Hence if the traffic in the datacenter is a mix of conventional TCP
+      and DCTCP, it is recommended that DCTCP traffic be segregated from conventional TCP traffic. <xref target='MORGANSTANLEY' /> describes
+      a deployment that uses IP DSCP bits where AQM is applied to DCTCP traffic, while TCP traffic is managed via drop-tail queueing.
+      </t>
+      <t> Today's commodity switches allow configuration of a different marking/drop profile for non-TCP and non-IP packets. Non-TCP and non-IP
+      packets should be able to pass through the switch unless the switch is really out of buffers. If the traffic in the datacenter consists of
+      such traffic (including UDP), one possible mitigation would be to mark IP packets as ECT even when there is no transport that is reacting
+      to the marking.
+      </t>
       <t> Since DCTCP relies on congestion marking by the switch, DCTCP can only be deployed in datacenters where the network
       infrastructure supports ECN. The switches may also support configuration of the congestion threshold used for marking.
-      <xref target='DCTCP10' /> provides a theoretical basis for selecting the congestion threshold, but as with estimation gain,
-      it may be more practical to rely on experimentation or simply to use the default configuration of the device.
+      The proposed parameterization can be configured with switches that implement RED. <xref target='DCTCP10' /> provides a theoretical
+      basis for selecting the congestion threshold, but as with estimation gain, it may be more practical to rely on experimentation or
+      simply to use the default configuration of the device. DCTCP will degrade to loss-based congestion control when transiting a
+      congested drop-tail link.
       </t>
       <t> DCTCP requires changes on both the sender and the receiver, so both endpoints must support DCTCP. Furthermore, DCTCP
       provides no mechanism for negotiating its use, so both endpoints must be configured through some out-of-band mechanism to
       use DCTCP. A variant of DCTCP that can be deployed unilaterally and only requires standard ECN behavior has been described
-      in <xref target="ODCTCP"/><xref target="BSDCAN"/>, but requires additional experimental evaluation.
+      in <xref target="ODCTCP"/>, but requires additional experimental evaluation.
       </t>
     </section>
 
     <section title='Known Issues'>
       <t> DCTCP relies on the sender's ability to reconstruct the stream of CE codepoints received by the remote endpoint. To
       accomplish this, DCTCP avoids using a single ACK packet to acknowledge segments received both with and without the CE
-      codepoint set. However, if an ACK packet is dropped, it's possible that a subsequent ACK will indeed acknowledge a mix of
-      CE and non-CE segments. This will, of course, result in a less accurate congestion estimate. There are some potential
+      codepoint set. However, if one or more ACK packets are dropped, it's possible that a subsequent ACK will cumulatively acknowledge
+      a mix of CE and non-CE segments. This will, of course, result in a less accurate congestion estimate. There are some potential
       mitigations:
         <list style="symbols">
           <t> Even with a degraded congestion estimate, DCTCP may still perform better than <xref target="RFC3168"/>.
@@ -327,24 +368,11 @@
       </t>
       <t> DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
       required to ensure that DCTCP is not used with non-DCTCP endpoints. The affect of using DCTCP with a standard ECN endpoint
-      has been analyzed in <xref target="ODCTCP"/><xref target="BSDCAN"/>. Furthermore, it's possible that other implementations may also modify
+      has been analyzed in <xref target="ODCTCP"/>. Furthermore, it's possible that other implementations may also modify
       <xref target="RFC3168"/> behavior without negotiation, causing further interoperability issues.
       </t>
       <t> Much like standard TCP, DCTCP is biased against flows with longer RTTs. A method for improving the fairness of DCTCP
       has been proposed in <xref target="ADCTCP"/>, but requires additional experimental evaluation.
-      </t>
-    </section>
-
-    <section title='Implementation Status'>
-      <t>
-        This section documents the implementation status of the specification
-        in this document, as recommended by <xref target="RFC6982"/>.
-      </t>
-      <t>
-      This document describes DCTCP as implemented in Microsoft Windows Server 2012.
-      Since publication of the first versions of this document, the Linux <xref target="LINUX"/>
-      and FreeBSD <xref target="FREEBSD"/> operating systems have also implemented support for DCTCP in a way
-      that is believed to follow this document.
       </t>
     </section>
 
@@ -367,7 +395,7 @@
           Murari Sridharan.
       </t>
       <t>
-        Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation program 2014-2018 under grant agreement No. 644866 ("SSICLOPS").
+        Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation program 2014-2018 under grant agreement No. 644866.
         This document reflects only the authors' views and the European Commission is not responsible for any use that may be made of the information it contains.
       </t>
     </section>
@@ -384,8 +412,7 @@
     <references title='Informative References'>
       &rfc5681;
       &rfc5562;
-      &rfc6982;
-      <reference anchor='DCTCP10' target='http://dl.acm.org/citation.cfm?doid=1851182.1851192'>
+      <reference anchor='DCTCP10' target='http://www.sigcomm.org/ccr/papers/2010/October/1851275.1851192/'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
           <author initials="M." surname="Alizadeh" fullname="Mohammad Alizadeh">
@@ -436,9 +463,8 @@
               <email> muraris@microsoft.com </email>
             </address>
           </author>
-          <date year="2010" month="August"/>
+          <date year="2010" month="December"/>
         </front>
-        <seriesInfo name="" value="Proc. ACM SIGCOMM 2010 Conference (SIGCOMM 10)"/>
       </reference>
       <reference anchor="ODCTCP" target="http://eggert.org/students/kato-thesis.pdf">
         <front>
@@ -449,31 +475,9 @@ One-Sided Datacenter TCP</title>
           </author>
           <date year="2014"/>
         </front>
-        <seriesInfo name="" value="M.S. Thesis, Keio University"/>
+        <seriesInfo name="M.S. Thesis," value="Keio University"/>
       </reference>
-      <reference anchor="BSDCAN" target="https://www.bsdcan.org/2015/schedule/events/559.en.html">
-        <front>
-          <title>Extensions to FreeBSD Datacenter TCP for Incremental Deployment Support</title>
-          <author initials="M." surname="Kato">
-            <organization />
-          </author>
-          <author initials="L." surname="Eggert">
-            <organization />
-          </author>
-          <author initials="A." surname="Zimmermann">
-            <organization />
-          </author>
-          <author initials="R." surname="van Meter">
-            <organization />
-          </author>
-          <author initials="H." surname="Tokuda">
-            <organization />
-          </author>
-          <date month="June" year="2015"/>
-        </front>
-        <seriesInfo name="" value="BSDCan 2015"/>
-      </reference>
-      <reference anchor="ADCTCP" target="https://dl.acm.org/citation.cfm?id=1993753">
+      <reference anchor="ADCTCP" target="http://simula.stanford.edu/~alizade/Site/DCTCP_files/dctcp_analysis-full.pdf">
         <front>
           <title> Analysis of DCTCP: Stability, Convergence, and Fairness </title>
           <author initials="M." surname="Alizadeh" fullname="Mohammad Alizadeh">
@@ -496,7 +500,6 @@ One-Sided Datacenter TCP</title>
           </author>
           <date year="2011" month="June"/>
         </front>
-        <seriesInfo name="" value="Proc. ACM SIGMETRICS Joint International Conference on Measurement and Modeling of Computer Systems (SIGMETRICS 11)"/>
       </reference>
       <reference anchor="LINUX" target="https://git.kernel.org/cgit/linux/kernel/git/davem/net-next.git/commit/?id=e3118e8359bb7c59555aca60c725106e6d78c5ce">
         <front>
@@ -531,9 +534,8 @@ One-Sided Datacenter TCP</title>
               <email> glenn.judd@morganstanley.com </email>
             </address>
           </author>
-          <date month="May" year="2015"/>
+          <date year="2015"/>
         </front>
-          <seriesInfo name="" value="Proc. 12th USENIX Symposium on Networked Systems Design and Implementation (NSDI 15)"/>
       </reference>
     </references>
   </back>
