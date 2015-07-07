@@ -17,7 +17,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-bensley-tcpm-dctcp-04" ipr="trust200902" category="info">
+<rfc docName="draft-bensley-tcpm-dctcp-05" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -65,7 +65,7 @@
     <author initials='G.' surname='Judd' fullname='Glenn Judd'>
       <organization>Morgan Stanley</organization>
       <address>
-        <phone>+1 </phone>
+        <phone>+1 973 979 6481</phone>
         <email>glenn.judd@morganstanley.com</email>
       </address>
     </author>
@@ -347,7 +347,7 @@
     <section title='Known Issues'>
       <t> DCTCP relies on the sender's ability to reconstruct the stream of CE codepoints received by the remote endpoint. To
       accomplish this, DCTCP avoids using a single ACK packet to acknowledge segments received both with and without the CE
-      codepoint set. However, if one or more ACK packets are dropped, it's possible that a subsequent ACK will cumulatively acknowledge
+      codepoint set. However, if one or more ACK packets are dropped, it is possible that a subsequent ACK will cumulatively acknowledge
       a mix of CE and non-CE segments. This will, of course, result in a less accurate congestion estimate. There are some potential
       mitigations:
         <list style="symbols">
@@ -363,7 +363,7 @@
       </t>
       <t> DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
       required to ensure that DCTCP is not used with non-DCTCP endpoints. The affect of using DCTCP with a standard ECN endpoint
-      has been analyzed in <xref target="ODCTCP"/><xref target="BSDCAN"/>. Furthermore, it's possible that other implementations may also modify
+      has been analyzed in <xref target="ODCTCP"/><xref target="BSDCAN"/>. Furthermore, it is possible that other implementations may also modify
       <xref target="RFC3168"/> behavior without negotiation, causing further interoperability issues.
       </t>
       <t> Much like standard TCP, DCTCP is biased against flows with longer RTTs. A method for improving the fairness of DCTCP
@@ -470,6 +470,7 @@
           </author>
           <date year="2010" month="August"/>
         </front>
+        <seriesInfo name="" value="Proc. ACM SIGCOMM 2010 Conference (SIGCOMM 10)"/>
       </reference>
       <reference anchor="ODCTCP" target="http://eggert.org/students/kato-thesis.pdf">
         <front>
