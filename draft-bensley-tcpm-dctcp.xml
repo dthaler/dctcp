@@ -416,6 +416,7 @@
     <references title='Informative References'>
       &rfc5681;
       &rfc5562;
+      &rfc6982;
       <reference anchor='DCTCP10' target='http://dl.acm.org/citation.cfm?doid=1851182.1851192'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
