@@ -17,9 +17,9 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-bensley-tcpm-dctcp-05" ipr="trust200902" category="info">
+<rfc docName="draft-ietf-tcpm-dctcp" ipr="trust200902" category="info">
   <front>
-    <title abbrev='DCTCP'>Microsoft's&nbsp;Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
+    <title abbrev='DCTCP'>Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
       <organization>Microsoft</organization>
       <address>
@@ -157,9 +157,8 @@
       </section>
 
       <section title='Echoing Congestion Information on the Receiver'>
-        <t> According to Section 6.1.3 of <xref target="RFC3168"/>, the
-            receiver sets the ECE flag if any of the packets being acknowledged had the CE code point
-        set. The receiver then continues to set the ECE flag until it receives a packet with the Congestion Window Reduced (CWR)
+        <t> According to Section 6.1.3 of <xref target="RFC3168"/>, the receiver sets the ECE flag if any of the packets being acknowledged had
+        the CE code point set. The receiver then continues to set the ECE flag until it receives a packet with the Congestion Window Reduced (CWR)
         flag set. However, the DCTCP algorithm requires more detailed congestion information. In particular, the sender must be
         able to determine the number of sent bytes that encountered congestion. Thus, the scheme described in <xref target="RFC3168"/> does not
         suffice.
@@ -183,6 +182,27 @@
            </t>
            </list>
         </t>
+        <t> The handling of the "Congestion Window Reduced" (CWR) bit is also exactly as per <xref target="RFC3168"/>
+        including the Errata ID: 3639. That is, on receipt of a segment with both CE and CWR bits set, then CWR is processed first and then
+        ECE is processed.
+        </t>
+
+        <figure align="center" anchor="dctcp_state_machine_graph">
+        <artwork align="center"><![CDATA[
+                               Send immediate
+                               ACK with ECE=0
+                     .----.    .-------------.     .---.
+        Send 1 ACK  /     v    v             |    |     \
+         for every |     .------.           .------.     | Send 1 ACK
+         m packets |     | CE=0 |           | CE=1 |     | for every
+        with ECE=0 |     '------'           '------'     | m packets
+                    \     |    |             ^    ^     /  with ECE=1
+                     '---'      '------------'    '----'
+                                Send immediate
+                                ACK with ECE=1
+        ]]></artwork>
+        <postamble>Two state ACK generation state machine. DCTCP.CE is abberviated as CE.</postamble> </figure>
+
       </section>
 
       <section title='Processing Congestion Indications on the Sender' anchor='senderprocessing'>
@@ -233,7 +253,7 @@
                 <t> DCTCP.BytesMarked += BytesAcked </t>
               </list>
             </t>
-            <t> If the sequence number is less than or equal to DCTCP.WindowEnd, then stop processing. Otherwise,
+            <t> If the acknowledgement number is less than or equal to DCTCP.WindowEnd, then stop processing. Otherwise,
             the end of the observation window was reached, so proceed to update the congestion estimate as follows:
             </t>
             <t> Compute the congestion level for the current observation window:
@@ -294,19 +314,24 @@
       </t>
       <t> The implementation must also decide when to use DCTCP. Datacenter servers may need to communicate with endpoints outside
       the datacenter, where DCTCP is unsuitable or unsupported. Thus, a global configuration setting to enable DCTCP will
-      generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012
+      generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012 onwards
       also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under
       the assumption that if the RTT is low, then the two endpoints are likely on the same datacenter network.
       </t>
+      <t> It is recommended that the implementation deal with loss episodes in the same way as conventional TCP. In case of a timeout or
+      fast retransmit or any change in delay (for delay based congestion control), the cwnd and other state variables like ssthresh must be
+      changed in the same way that conventional TCP would have changed them. It would be useful to implement DCTCP as additional actions on
+      top of an existing congestion control algorithm like New Reno. The DCTCP implementation may also allow configuration for discarding the
+      value of DCTCP.Alpha as part of processing any loss episodes.
+      </t>
       <t> To prevent incast throughput collapse the minimum RTO (MinRTO) used by TCP should be lowered significantly. The default value of
-      MinRTO in Windows is 300 msec which is much greater than the maximum latencies inside a datacenter. Server 2012 onwards the MinRTO
-      value is configurable allowing values as low as 10 msec on a per subnet or per TCP port basis or even globally. A lower MinRTO value
+      MinRTO in Windows is 300 msec which is much greater than the maximum latencies inside a datacenter. Microsoft Windows Server 2012 onwards the
+      MinRTO value is configurable allowing values as low as 10 msec on a per subnet or per TCP port basis or even globally. A lower MinRTO value
       requires corresponding a lower delayed ACK timeout on the receiver. It is recommended that the implementation allow configuration of
       lower timeouts for DCTCP connections.
       </t>
-      <t> In the same vein, it is also recommended that the implementation allow configuration of restarting the cwnd of
-      idle DCTCP connections as described in <xref target="RFC5681"/> since network conditions change rapidly in the datacenter. The
-      implementation can also allow configuration for discarding the value of DCTCP.Alpha after cwnd restart and timeouts.
+      <t> In the same vein, it is also recommended that the implementation allow configuration of restarting the congestion window (cwnd) of
+      idle DCTCP connections as described in <xref target="RFC5681"/> since network conditions change rapidly in the datacenter.
       </t>
       <t> <xref target="RFC3168"/> forbids the ECN-marking of pure ACK packets because of the inability of TCP to mitigate ACK-path
       congestion and protocol-wise preferential treatment by routers. However dropping pure ACKs rather than ECN marking them is
@@ -359,7 +384,7 @@
           and the estimate will be unaffected.
           </t>
         </list>
-      However, the affect of packet drops on DCTCP under real world conditions has not been analyzed.
+      However, the effect of packet drops on DCTCP under real world conditions has not been analyzed.
       </t>
       <t> DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
       required to ensure that DCTCP is not used with non-DCTCP endpoints. The affect of using DCTCP with a standard ECN endpoint
