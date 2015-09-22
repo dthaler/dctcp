@@ -17,7 +17,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-ietf-tcpm-dctcp" ipr="trust200902" category="info">
+<rfc docName="draft-ietf-tcpm-dctcp-00" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -86,43 +86,43 @@
 
   <middle>
     <section title='Introduction'>
-      <t> Large datacenters necessarily need a large number of network switches to interconnect the servers in the datacenter.
-      Therefore, a datacenter can greatly reduce its capital expenditure by leveraging low cost switches. However, low cost
-      switches tend to have limited queue capacities and thus are more susceptible to packet loss due to congestion.
+      <t> Large datacenters necessarily need many network switches to interconnect its many servers.
+      Therefore, a datacenter can greatly reduce its capital expenditure by leveraging low-cost switches. However, such low-cost
+      switches tend to have limited queue capacities and are thus more susceptible to packet loss due to congestion.
       </t>
-      <t> Network traffic in the datacenter is often a mix of short and long flows, where the short flows require low latency and
-      the long flows require high throughput. Datacenters also experience incast bursts, where many endpoints send traffic to a
-      single server at the same time. For example, this is a natural consequence of MapReduce algorithms. The worker nodes
+      <t> Network traffic in a datacenter is often a mix of short and long flows, where the short flows require low latencies and
+      the long flows require high throughputs. Datacenters also experience incast bursts, where many servers send traffic to a
+      single server at the same time. For example, this traffic pattern is a natural consequence of MapReduce workload: The worker nodes
       complete at approximately the same time, and all reply to the master node concurrently.
       </t>
       <t> These factors place some conflicting demands on the queue occupancy of a switch:
         <list style='symbols'>
           <t> The queue must be short enough that it does not impose excessive latency on short flows.
           </t>
-          <t> The queue must be long enough to buffer sufficient data for the long flows to saturate the path bandwidth.
+          <t> The queue must be long enough to buffer sufficient data for the long flows to saturate the path capacity.
           </t>
           <t> The queue must be short enough to absorb incast bursts without excessive packet loss.
           </t>
         </list>
       </t>
-      <t> Standard TCP congestion control <xref target="RFC5681"/> relies on segment loss to detect congestion. This does not meet
-      the demands described above. First, the short flows will start to experience unacceptable latencies before packet loss
-      occurs. Second, by the time TCP congestion control kicks in on the sender, most of the incast burst has already been dropped.
+      <t> Standard TCP congestion control <xref target="RFC5681"/> relies on packet loss to detect congestion. This does not meet
+      the demands described above. First, short flows will start to experience unacceptable latencies before packet loss
+      occurs. Second, by the time TCP congestion control kicks in on the senders, most of the incast burst has already been dropped.
       </t>
-      <t> <xref target="RFC3168"/> describes a mechanism for using Explicit Congestion Notification (ECN) from the switch for early
-      detection of congestion, rather than waiting for segment loss to occur. However, this method only detects the presence of
-      congestion, not the extent. In the presence of mild congestion, the TCP congestion window is reduced too aggressively and
-      unnecessarily affects the throughput of long flows.
+      <t> <xref target="RFC3168"/> describes a mechanism for using Explicit Congestion Notification (ECN) from the switches for early
+      detection of congestion, rather than waiting for packet loss to occur. However, this method only detects the presence of
+      congestion, not its extent. In the presence of mild congestion, the TCP congestion window is reduced too aggressively and this
+      unnecessarily reduces the throughput of long flows.
       </t>
-      <t> Datacenter TCP (DCTCP) improvises upon traditional ECN processing by estimating the fraction of bytes that
+      <t> Datacenter TCP (DCTCP) improves traditional ECN processing by estimating the fraction of bytes that
       encounter congestion, rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion
       window based on this estimate. This method achieves high burst tolerance, low latency, and high throughput with
       shallow-buffered switches.
       </t>
       <t>
       It is recommended that DCTCP be deployed in a datacenter environment where the endpoints and the switching fabric are under a single
-      administrative domain. Deployment issues around coexistence of DCTCP and conventional TCP, and lack of a negotiating mechanism between
-      sender and receiver, and possible mitigations are also discussed.
+      administrative domain. This memo also discusses deployment issues related to the coexistence of DCTCP and conventional TCP, the lack of a negotiating mechanism between
+      sender and receiver, and presents some possible mitigations.
       </t>
     </section>
 
@@ -135,19 +135,19 @@
     <section title='DCTCP Algorithm'>
       <t> There are three components involved in the DCTCP algorithm:
         <list style='symbols'>
-          <t> The switch (or other intermediate device on the network) detects congestion and sets the Congestion Encountered (CE)
+          <t> The switches (or other intermediate devices in the network) detect congestion and set the Congestion Encountered (CE)
               codepoint in the IP header.
           </t>
-          <t> The receiver echoes the congestion information back to the sender using the ECN-Echo (ECE) flag in the TCP header.
+          <t> The receiver echoes the congestion information back to the sender, using the ECN-Echo (ECE) flag in the TCP header.
           </t>
-          <t> The sender reacts to the congestion indication by reducing the TCP congestion window (cwnd).
+          <t> The sender computes a congestion estimate and reacts, by reducing the TCP congestion window accordingly (cwnd).
           </t>
         </list>
       </t>
 
-      <section title='Marking Congestion on the Switch'>
-        <t> The switch indicates congestion to the end nodes by setting the CE codepoint in the IP header as specified in Section 5 of <xref target="RFC3168"/>.
-        For example, the switch may be configured with a congestion threshold. When a packet arrives at the switch and
+      <section title='Marking Congestion on the Switches'>
+        <t>The switches in a datacenter fabric indicate congestion to the end nodes by setting the CE codepoint in the IP header as specified in Section 5 of <xref target="RFC3168"/>.
+        For example, the switches may be configured with a congestion threshold. When a packet arrives at a switch and
         its queue length is greater than the congestion threshold, the switch sets the CE codepoint in the packet.
         For example, Section 3.4 of <xref target="DCTCP10"/> suggests threshold marking with a threshold K > (RTT * C)/7, where C is the sending rate in packets per second.
         However, the actual algorithm for marking congestion is an implementation detail of the switch and will generally not be
@@ -167,7 +167,7 @@
         in the packet being acknowledged. However, this prevents the use of delayed ACKs, which are an important performance
         optimization in datacenters.
         </t>
-        <t>Instead, DCTCP introduces a new Boolean TCP state variable, DCTCP Congestion Encountered
+        <t>Instead, DCTCP introduces a new Boolean TCP state variable, "DCTCP Congestion Encountered"
         (DCTCP.CE), which is initialized to false and stored in the
         Transmission Control Block (TCB). When sending an ACK, the ECE flag MUST be set if and only if
         DCTCP.CE is true. When receiving packets, the CE codepoint MUST be processed as follows:
@@ -183,11 +183,11 @@
            </list>
         </t>
         <t> The handling of the "Congestion Window Reduced" (CWR) bit is also exactly as per <xref target="RFC3168"/>
-        including the Errata ID: 3639. That is, on receipt of a segment with both CE and CWR bits set, then CWR is processed first and then
+        including <xref target="RFC3168-ERRATA3639"/>. That is, on receipt of a segment with both the CE and CWR bits set, CWR is processed first and then
         ECE is processed.
         </t>
 
-        <figure align="center" anchor="dctcp_state_machine_graph">
+        <figure align="center" anchor="dctcp_state_machine_graph" title="ACK generation state machine. DCTCP.CE abbreviated as CE.">
         <artwork align="center"><![CDATA[
                                Send immediate
                                ACK with ECE=0
@@ -201,7 +201,7 @@
                                 Send immediate
                                 ACK with ECE=1
         ]]></artwork>
-        <postamble>Two state ACK generation state machine. DCTCP.CE is abberviated as CE.</postamble> </figure>
+</figure>
 
       </section>
 
@@ -253,8 +253,8 @@
                 <t> DCTCP.BytesMarked += BytesAcked </t>
               </list>
             </t>
-            <t> If the acknowledgement number is less than or equal to DCTCP.WindowEnd, then stop processing. Otherwise,
-            the end of the observation window was reached, so proceed to update the congestion estimate as follows:
+            <t> If the acknowledgment number is less than or equal to DCTCP.WindowEnd, stop processing. Otherwise,
+            the end of the observation window has been reached, so proceed to update the congestion estimate as follows:
             </t>
             <t> Compute the congestion level for the current observation window:
               <list style='none'>
@@ -285,80 +285,80 @@
             </t>
           </list>
         </t>
-        <t> Thus, when no sent byte experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent
+        <t> Thus, when no sent bytes experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent
         bytes experienced congestion, DCTCP.Alpha equals one, and cwnd is reduced by half. Lower levels of congestion will result
         in correspondingly smaller reductions to cwnd.
         </t>
-        <t> Just as specified in <xref target="RFC3168"/>, TCP should not react to congestion indications more than once every
+        <t> Just as specified in <xref target="RFC3168"/>, TCP should not react to congestion indications more than once for every
         window of data. The setting of the "Congestion Window Reduced" (CWR) bit is also exactly as per <xref target="RFC3168"/>.
         </t>
       </section>
 
       <section title='Handling of SYN, SYN-ACK, RST Packets'>
-        <t> <xref target="RFC3168"/> requires that compliant TCP MUST NOT set ECT on SYN or SYN-ACK packets. <xref target="RFC5562"/>
+        <t> <xref target="RFC3168"/> requires that a compliant TCP MUST NOT set ECT on SYN or SYN-ACK packets. <xref target="RFC5562"/>
         proposes setting ECT on SYN-ACK packets, but maintains the restriction of no ECT on SYN packets. Both these RFCs prohibit
         ECT in SYN packets due to security concerns regarding malicious SYN packets with ECT set. These RFCs, however, are intended
-        for general Internet use, and do not directly apply to a controlled datacenter deployment. The switching fabric can drop TCP
-        packets that do not have the ECT set in the IP header. If SYN and SYN-ACK packets for DCTCP connections are non-ECT they will
-        be dropped with high probability. For DCTCP connections the sender SHOULD set ECT for SYN, SYN-ACK and RST packets.
+        for general Internet use, and do not directly apply to a controlled datacenter environment. The switching fabric can drop TCP
+        packets that do not have the ECT set in the IP header. If SYN and SYN-ACK packets for DCTCP connections do not have ECT set, they will
+        be dropped with high probability. For DCTCP connections, the sender SHOULD set ECT for SYN, SYN-ACK and RST packets.
         </t>
       </section>
 
     </section>
 
     <section title='Implementation Issues' anchor="implissues">
-      <t> As noted in <xref target='senderprocessing' />, the implementation must choose a suitable estimation gain.
+      <t> As noted in <xref target='senderprocessing' />, the implementation MUST choose a suitable estimation gain.
       <xref target='DCTCP10' /> provides a theoretical basis for selecting the gain. However, it may be more practical to use
       experimentation to select a suitable gain for a particular network and workload. The Microsoft implementation of DCTCP
       in Windows Server 2012 uses a fixed estimation gain of 1/16.
       </t>
       <t> The implementation must also decide when to use DCTCP. Datacenter servers may need to communicate with endpoints outside
       the datacenter, where DCTCP is unsuitable or unsupported. Thus, a global configuration setting to enable DCTCP will
-      generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012 onwards
+      generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012 (and later)
       also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under
       the assumption that if the RTT is low, then the two endpoints are likely on the same datacenter network.
       </t>
-      <t> It is recommended that the implementation deal with loss episodes in the same way as conventional TCP. In case of a timeout or
+      <t> It is RECOMMENDED that the implementation deal with loss episodes in the same way as conventional TCP. In case of a timeout or
       fast retransmit or any change in delay (for delay based congestion control), the cwnd and other state variables like ssthresh must be
-      changed in the same way that conventional TCP would have changed them. It would be useful to implement DCTCP as additional actions on
-      top of an existing congestion control algorithm like New Reno. The DCTCP implementation may also allow configuration for discarding the
+      changed in the same way that a conventional TCP would have changed them. It would be useful to implement DCTCP as additional actions on
+      top of an existing congestion control algorithm like NewReno. The DCTCP implementation MAY also allow configuration of resetting the
       value of DCTCP.Alpha as part of processing any loss episodes.
       </t>
-      <t> To prevent incast throughput collapse the minimum RTO (MinRTO) used by TCP should be lowered significantly. The default value of
-      MinRTO in Windows is 300 msec which is much greater than the maximum latencies inside a datacenter. Microsoft Windows Server 2012 onwards the
-      MinRTO value is configurable allowing values as low as 10 msec on a per subnet or per TCP port basis or even globally. A lower MinRTO value
-      requires corresponding a lower delayed ACK timeout on the receiver. It is recommended that the implementation allow configuration of
+      <t> To prevent incast throughput collapse, the minimum RTO (MinRTO) used by TCP should be lowered significantly. The default value of
+      MinRTO in Windows is 300 msec, which is much greater than the maximum latencies inside a datacenter. In Microsoft Windows Server 2012 (and later), the
+      MinRTO value is configurable, allowing values as low as 10 msec on a per-subnet or per-port basis (or even globally.) A lower MinRTO value
+      requires a correspondingly lower delayed ACK timeout on the receiver. It is RECOMMENDED that an implementation allow configuration of
       lower timeouts for DCTCP connections.
       </t>
-      <t> In the same vein, it is also recommended that the implementation allow configuration of restarting the congestion window (cwnd) of
-      idle DCTCP connections as described in <xref target="RFC5681"/> since network conditions change rapidly in the datacenter.
+      <t> In the same vein, it is also RECOMMENDED that an implementation allow configuration of restarting the congestion window (cwnd) of
+      idle DCTCP connections as described in <xref target="RFC5681"/>, since network conditions can change rapidly in datacenters.
       </t>
-      <t> <xref target="RFC3168"/> forbids the ECN-marking of pure ACK packets because of the inability of TCP to mitigate ACK-path
-      congestion and protocol-wise preferential treatment by routers. However dropping pure ACKs rather than ECN marking them is
-      disadvantageous in traffic scenarios typical in the datacenter. Because of the prevalence of bursty traffic patterns which involve
-      transient congestion, the dropping of ACKS causes subsequent retransmission. It is recommended that the implementation a configuration
-      knob that forces ECT on TCP pure ACK packets.
+      <t> <xref target="RFC3168"/> forbids the ECN-marking of pure ACK packets, because of the inability of TCP to mitigate ACK-path
+      congestion and protocol-wise preferential treatment by routers. However, dropping pure ACKs - rather than ECN marking them - has
+      disadvantages for typical datacenter traffic patterns. Because of the prevalence of bursty traffic patterns that feature
+      transient congestion,  dropping of ACKs causes subsequent retransmissions. It is RECOMMENDED that an implementation provide a configuration
+      knob that forces ECT to be set on pure ACKs.
       </t>
     </section>
 
     <section title='Deployment Issues'>
-      <t> DCTCP and conventional TCP congestion control does not coexist well. In DCTCP, the marking threshold is set very low
-      value to reduce queueing delay, thus a relatively small amount of congestion will exceed the marking threshold. During such periods
-      of congestion, conventional TCP will suffer packet losses and quickly scale back cwnd. DCTCP, on the other hand, will use the fraction
-      of marked packets to scale back cwnd. Thus rate reduction in DCTCP will be much lower than that of conventional TCP, and DCTCP traffic
-      will dominate conventional TCP traffic traversing the same link. Hence if the traffic in the datacenter is a mix of conventional TCP
-      and DCTCP, it is recommended that DCTCP traffic be segregated from conventional TCP traffic. <xref target='MORGANSTANLEY' /> describes
-      a deployment that uses IP DSCP bits where AQM is applied to DCTCP traffic, while TCP traffic is managed via drop-tail queueing.
+      <t> DCTCP and conventional TCP congestion control do not coexist well in the same network. In DCTCP, the marking threshold is set to a very low
+      value to reduce queueing delay, and a relatively small amount of congestion will exceed the marking threshold. During such periods
+      of congestion, conventional TCP will suffer packet loss and quickly and drastically reduce cwnd. DCTCP, on the other hand, will use the fraction
+      of marked packets to reduce cwnd more gradually. Thus, the rate reduction in DCTCP will be much slower than that of conventional TCP, and DCTCP traffic
+      will gain a larger share of the capacity compared to conventional TCP traffic traversing the same path. If the traffic in the datacenter is a mix of conventional TCP
+      and DCTCP, it is RECOMMENDED that DCTCP traffic be segregated from conventional TCP traffic. <xref target='MORGANSTANLEY' /> describes
+      a deployment that uses the IP DSCP bits to segregate the network such that AQM is applied to DCTCP traffic, whereas TCP traffic is managed via drop-tail queueing.
       </t>
-      <t> Today's commodity switches allow configuration of a different marking/drop profile for non-TCP and non-IP packets. Non-TCP and non-IP
-      packets should be able to pass through the switch unless the switch is really out of buffers. If the traffic in the datacenter consists of
+      <t> Today's commodity switches allow configuration of different marking/drop profiles for non-TCP and non-IP packets. Non-TCP and non-IP
+      packets should be able to pass through such switches, unless they really run out of buffer space. If the datacenter traffic consists of
       such traffic (including UDP), one possible mitigation would be to mark IP packets as ECT even when there is no transport that is reacting
       to the marking.
       </t>
-      <t> Since DCTCP relies on congestion marking by the switch, DCTCP can only be deployed in datacenters where the network
+      <t> Since DCTCP relies on congestion marking by the switches, DCTCP can only be deployed in datacenters where the entire network
       infrastructure supports ECN. The switches may also support configuration of the congestion threshold used for marking.
       The proposed parameterization can be configured with switches that implement RED. <xref target='DCTCP10' /> provides a theoretical
-      basis for selecting the congestion threshold, but as with estimation gain, it may be more practical to rely on experimentation or
+      basis for selecting the congestion threshold, but as with the estimation gain, it may be more practical to rely on experimentation or
       simply to use the default configuration of the device. DCTCP will degrade to loss-based congestion control when transiting a
       congested drop-tail link.
       </t>
@@ -373,14 +373,14 @@
       <t> DCTCP relies on the sender's ability to reconstruct the stream of CE codepoints received by the remote endpoint. To
       accomplish this, DCTCP avoids using a single ACK packet to acknowledge segments received both with and without the CE
       codepoint set. However, if one or more ACK packets are dropped, it is possible that a subsequent ACK will cumulatively acknowledge
-      a mix of CE and non-CE segments. This will, of course, result in a less accurate congestion estimate. There are some potential
-      mitigations:
+      a mix of CE and non-CE segments. This will, of course, result in a less accurate congestion estimate. There are some potential considerations:
+
         <list style="symbols">
-          <t> Even with a degraded congestion estimate, DCTCP may still perform better than <xref target="RFC3168"/>.
+          <t> Even with an inaccurate congestion estimate, DCTCP may still perform better than <xref target="RFC3168"/>.
           </t>
-          <t> If the estimation gain is small relative to the packet loss rate, the estimate may not be degraded much.
+          <t> If the estimation gain is small relative to the packet loss rate, the estimate may not be too inaccurate.
           </t>
-          <t> If packet losses mostly occur under heavy congestion, most drops will occur during an unbroken string of CE packets,
+          <t> If packet loss mostly occurs under heavy congestion, most drops will occur during an unbroken string of CE packets,
           and the estimate will be unaffected.
           </t>
         </list>
@@ -495,6 +495,7 @@
           </author>
           <date year="2010" month="August"/>
         </front>
+        <seriesInfo name="DOI" value="10.1145/1851182.1851192"/>
         <seriesInfo name="" value="Proc. ACM SIGCOMM 2010 Conference (SIGCOMM 10)"/>
       </reference>
       <reference anchor="ODCTCP" target="http://eggert.org/students/kato-thesis.pdf">
@@ -552,6 +553,7 @@
           </author>
           <date year="2011" month="June"/>
         </front>
+        <seriesInfo name="DOI" value="10.1145/1993744.1993753"/>
         <seriesInfo name="" value="Proc. ACM SIGMETRICS Joint International Conference on Measurement and Modeling of Computer Systems (SIGMETRICS 11)"/>
       </reference>
       <reference anchor="LINUX" target="https://git.kernel.org/cgit/linux/kernel/git/davem/net-next.git/commit/?id=e3118e8359bb7c59555aca60c725106e6d78c5ce">
@@ -590,6 +592,15 @@
           <date month="May" year="2015"/>
         </front>
         <seriesInfo name="" value="Proc. 12th USENIX Symposium on Networked Systems Design and Implementation (NSDI 15)"/>
+      </reference>
+      <reference anchor="RFC3168-ERRATA3639" target="http://www.rfc-editor.org/errata_search.php?rfc=3168&amp;eid=3639">
+        <front>
+          <title>RFC3168 Errata ID 3639</title>
+          <author initials="R." surname="Scheffenegger">
+            <organization />
+          </author>
+          <date year="2013"/>
+        </front>
       </reference>
     </references>
   </back>
