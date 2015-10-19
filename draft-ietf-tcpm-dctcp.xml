@@ -76,10 +76,12 @@
     <keyword>DCTCP</keyword>
     <keyword>congestion control</keyword>
     <abstract>
-      <t> This memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic. DCTCP
-      uses improved Explicit Congestion Notification (ECN) processing to estimate the fraction of bytes that encounter congestion,
+      <t> This informational memo describes Datacenter TCP (DCTCP), an improvement to TCP congestion control for datacenter traffic.
+      DCTCP uses improved Explicit Congestion Notification (ECN) processing to estimate the fraction of bytes that encounter congestion,
       rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion window based on this
-      estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches.
+      estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches. This memo also
+      discusses deployment issues related to the coexistence of DCTCP and conventional TCP, the lack of a negotiating mechanism between
+      sender and receiver, and presents some possible mitigations.
       </t>
     </abstract>
   </front>
@@ -121,8 +123,7 @@
       </t>
       <t>
       It is recommended that DCTCP be deployed in a datacenter environment where the endpoints and the switching fabric are under a single
-      administrative domain. This memo also discusses deployment issues related to the coexistence of DCTCP and conventional TCP, the lack of a negotiating mechanism between
-      sender and receiver, and presents some possible mitigations.
+      administrative domain. This protocol is not meant for uncontrolled deployment in the global Internet.
       </t>
     </section>
 
@@ -314,9 +315,15 @@
       </t>
       <t> The implementation must also decide when to use DCTCP. Datacenter servers may need to communicate with endpoints outside
       the datacenter, where DCTCP is unsuitable or unsupported. Thus, a global configuration setting to enable DCTCP will
-      generally not suffice. DCTCP may be configured based on the IP address of the remote endpoint. Microsoft Windows Server 2012 (and later)
-      also supports automatic selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under
-      the assumption that if the RTT is low, then the two endpoints are likely on the same datacenter network.
+      generally not suffice. DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
+      required to ensure that DCTCP is not used with non-DCTCP endpoints.
+      </t>
+      <t>Potential solutions are either configuration based or heuristic based. A heuristic based solution needs to allow endpoints to individually
+      enable DCTCP to ensure a DCTCP sender is always paired with a DCTCP receiver.
+      One potential solution would be to allow configuration of DCTCP based on the IP address of the remote endpoint. Another solution would be to use an
+      automatic heuristic to detect connections within a datacenter. As an example, Microsoft Windows Server 2012 (and later versions) supports automatic
+      selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under the assumption that if the RTT is low, then
+      the two endpoints are likely in the same datacenter network.
       </t>
       <t> It is RECOMMENDED that the implementation deal with loss episodes in the same way as conventional TCP. In case of a timeout or
       fast retransmit or any change in delay (for delay based congestion control), the cwnd and other state variables like ssthresh must be
@@ -386,8 +393,7 @@
         </list>
       However, the effect of packet drops on DCTCP under real world conditions has not been analyzed.
       </t>
-      <t> DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
-      required to ensure that DCTCP is not used with non-DCTCP endpoints. The affect of using DCTCP with a standard ECN endpoint
+      <t> DCTCP provides no mechanism for negotiating its use. The effect of using DCTCP with a standard ECN endpoint
       has been analyzed in <xref target="ODCTCP"/><xref target="BSDCAN"/>. Furthermore, it is possible that other implementations may also modify
       <xref target="RFC3168"/> behavior without negotiation, causing further interoperability issues.
       </t>
