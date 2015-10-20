@@ -17,7 +17,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-ietf-tcpm-dctcp-00" ipr="trust200902" category="info">
+<rfc docName="draft-ietf-tcpm-dctcp-01" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -161,7 +161,7 @@
         <t> According to Section 6.1.3 of <xref target="RFC3168"/>, the receiver sets the ECE flag if any of the packets being acknowledged had
         the CE code point set. The receiver then continues to set the ECE flag until it receives a packet with the Congestion Window Reduced (CWR)
         flag set. However, the DCTCP algorithm requires more detailed congestion information. In particular, the sender must be
-        able to determine the number of sent bytes that encountered congestion. Thus, the scheme described in <xref target="RFC3168"/> does not
+        able to determine the number of bytes sent that encountered congestion. Thus, the scheme described in <xref target="RFC3168"/> does not
         suffice.
         </t>
         <t> One possible solution is to ACK every packet and set the ECE flag in the ACK if and only if the CE code point was set
@@ -207,7 +207,7 @@
       </section>
 
       <section title='Processing Congestion Indications on the Sender' anchor='senderprocessing'>
-        <t> The sender estimates the fraction of sent bytes that encountered congestion. The current estimate is stored in a new
+        <t> The sender estimates the fraction of bytes sent that encountered congestion. The current estimate is stored in a new
         TCP state variable, DCTCP.Alpha, which is initialized to 1 and MUST be updated as follows:
           <list>
             <t> DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M </t>
@@ -218,9 +218,9 @@
             <t> g is the estimation gain, a real number between 0 and 1. The selection of g is left to the implementation.
             See <xref target="implissues"/> for further considerations.
             </t>
-            <t> M is the fraction of sent bytes that encountered congestion during the previous observation window, where the
+            <t> M is the fraction of bytes sent that encountered congestion during the previous observation window, where the
             observation window is chosen to be approximately the Round Trip Time (RTT). In particular, an observation window
-            ends when all the sent bytes in flight at the beginning of the window have been acknowledged.
+            ends when all bytes in flight at the beginning of the window have been acknowledged.
             </t>
           </list>
         </t>
@@ -286,7 +286,7 @@
             </t>
           </list>
         </t>
-        <t> Thus, when no sent bytes experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent
+        <t> Thus, when no bytes sent experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent
         bytes experienced congestion, DCTCP.Alpha equals one, and cwnd is reduced by half. Lower levels of congestion will result
         in correspondingly smaller reductions to cwnd.
         </t>
@@ -318,14 +318,14 @@
       generally not suffice. DCTCP provides no mechanism for negotiating its use. Thus, there is additional management and configuration overhead
       required to ensure that DCTCP is not used with non-DCTCP endpoints.
       </t>
-      <t>Potential solutions are either configuration based or heuristic based. A heuristic based solution needs to allow endpoints to individually
-      enable DCTCP to ensure a DCTCP sender is always paired with a DCTCP receiver.
-      One potential solution would be to allow configuration of DCTCP based on the IP address of the remote endpoint. Another solution would be to use an
-      automatic heuristic to detect connections within a datacenter. As an example, Microsoft Windows Server 2012 (and later versions) supports automatic
+      <t>Potential solutions rely on either configuration or heuristics. Heuristics need to allow endpoints to individually
+      enable DCTCP, to ensure a DCTCP sender is always paired with a DCTCP receiver.
+      One approach is to enable DCTCP based on the IP address of the remote endpoint. Another approach is to
+      detect connections that transmit within the bounds a datacenter. For example, Microsoft Windows Server 2012 (and later versions) supports automatic
       selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under the assumption that if the RTT is low, then
       the two endpoints are likely in the same datacenter network.
       </t>
-      <t> It is RECOMMENDED that the implementation deal with loss episodes in the same way as conventional TCP. In case of a timeout or
+      <t> It is RECOMMENDED that an implementation deal with loss episodes in the same way as conventional TCP. In case of a timeout or
       fast retransmit or any change in delay (for delay based congestion control), the cwnd and other state variables like ssthresh must be
       changed in the same way that a conventional TCP would have changed them. It would be useful to implement DCTCP as additional actions on
       top of an existing congestion control algorithm like NewReno. The DCTCP implementation MAY also allow configuration of resetting the
