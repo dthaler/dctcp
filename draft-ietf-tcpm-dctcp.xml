@@ -347,19 +347,31 @@
       knob that forces ECT to be set on pure ACKs.
       </t>
       <t> The DCTCP.Alpha calculation as per the formula in <xref target='senderprocessing' /> involves fractions. An efficient implementation in kernel
-      mode may use scaling of the DCTCP.Alpha value. A scaled value may be efficiently computed by a left shift operation. For example if the implementation
-      chooses the value of g as 1/16, it may store the value of DCTCP.Alpha left-shifted by 4. This results in the following computation:
-          <list>
-            <t> ScaledM = (65536 * DCTCP.BytesMarked / DCTCP.BytesSent) </t>
-            <t> DCTCP.Alpha =  DCTCP.Alpha + (M - (DCTCP.Alpha >> 4)) </t>
-          </list>
+      mode may use scaling of the DCTCP.Alpha value to be efficiently computed using shift operations. For example if the implementation chooses the value
+      of g as 1/16, multiplications of DCTCP.Alpha by g become right-shifts by 4.
+      A scaled implementation should take care that DCTCP.Alpha is able to reach zero once it falls below the smallest shift value (16 in the above example).
+      At the other extreme, a scaled update must also ensure DCTCP.Alpha does not exceed the scaling factor, which would be equivalent to greater than
+      100% congestion.  So, DCTCP.Alpha must be clamped after an update.
       </t>
-      <t> If an implementation uses a scaled value of DCTCP.Alpha, the value of DCTCP.Alpha may never reach zero even if M is consistently 0 across multiple
-      observation windows. To avoid this it is advised that value of DCTCP.Alpha be reset to 0 once it falls below the smallest shift value (16 in the
-      above example), resulting in an additional step in the computation which for this example would be as follows:
-          <list>
-            <t> if (DCTCP.Alpha >> 4) is 0 then DCTCP.Alpha = 0 </t>
-          </list>
+      <t> This results in the following computations replacing steps 5 and 6:
+        <list style='numbers'>
+	        <t> Compute the congestion level for the current observation window:
+	          <list style='none'>
+	            <t> ScaledM = (ScalingFactor * DCTCP.BytesMarked / DCTCP.BytesSent) </t>
+	          </list>
+	        </t>
+	        <t> Update the congestion estimate:
+	          <list style='none'>
+	            <t> if (DCTCP.Alpha >> 4) is 0 then DCTCP.Alpha = 0 </t>
+	          </list>
+	          <list style='none'>
+	            <t> DCTCP.Alpha = DCTCP.Alpha + (ScaledM >> 4) - (DCTCP.Alpha >> 4) </t>
+	          </list>
+	          <list style='none'>
+	            <t> if (DCTCP.Alpha > ScalingFactor) then DCTCP.Alpha = ScalingFactor </t>
+	          </list>
+	        </t>
+	    </list>
       </t>
     </section>
 
@@ -447,6 +459,8 @@
       <t>
         Lars Eggert has received funding from the European Union's Horizon 2020 research and innovation program 2014-2018 under grant agreement No. 644866 ("SSICLOPS").
         This document reflects only the authors' views and the European Commission is not responsible for any use that may be made of the information it contains.
+      </t>
+      <t> We would like to thank Andrew Shewmaker for finding the problem of the DCTCP.Alpha value clamping and proposing a solution for the same.
       </t>
     </section>
   </middle>
