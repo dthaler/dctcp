@@ -348,7 +348,7 @@
       </t>
       <t> The DCTCP.Alpha calculation as per the formula in <xref target='senderprocessing' /> involves fractions. An efficient implementation in kernel
       mode may use scaling of the DCTCP.Alpha value to be efficiently computed using shift operations. For example if the implementation chooses the value
-      of g as 1/16, multiplications of DCTCP.Alpha by g become right-shifts by 4.
+      of g as 1/16, multiplications of DCTCP.Alpha by g become right-shifts by 4. Let's call the value 4 as ShiftFactor.
       A scaled implementation should take care that DCTCP.Alpha is able to reach zero once it falls below the smallest shift value (16 in the above example).
       At the other extreme, a scaled update must also ensure DCTCP.Alpha does not exceed the scaling factor, which would be equivalent to greater than
       100% congestion.  So, DCTCP.Alpha must be clamped after an update.
@@ -362,10 +362,10 @@
 	        </t>
 	        <t> Update the congestion estimate:
 	          <list style='none'>
-	            <t> if (DCTCP.Alpha >> 4) is 0 then DCTCP.Alpha = 0 </t>
+	            <t> if (DCTCP.Alpha >> ShiftFactor) is 0 then DCTCP.Alpha = 0 </t>
 	          </list>
 	          <list style='none'>
-	            <t> DCTCP.Alpha = DCTCP.Alpha + (ScaledM >> 4) - (DCTCP.Alpha >> 4) </t>
+	            <t> DCTCP.Alpha = DCTCP.Alpha + (ScaledM >> ShiftFactor) - (DCTCP.Alpha >> ShiftFactor) </t>
 	          </list>
 	          <list style='none'>
 	            <t> if (DCTCP.Alpha > ScalingFactor) then DCTCP.Alpha = ScalingFactor </t>
