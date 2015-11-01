@@ -353,22 +353,23 @@
       At the other extreme, a scaled update MUST also ensure DCTCP.Alpha does not exceed the scaling factor, which would be equivalent to greater than
       100% congestion.  So, DCTCP.Alpha MUST be clamped after an update.
       </t>
-      <t> This results in the following computations replacing steps 5 and 6 in <xref target='senderprocessing' />, where SF is the chosen scaling factor:
+      <t> This results in the following computations replacing steps 5 and 6 in <xref target='senderprocessing' />, where SCF is the chosen
+      scaling factor (65536 in the example) and SHF is the shift factor (4 in the example):
         <list style='numbers'>
 	        <t> Compute the congestion level for the current observation window:
 	          <list style='none'>
-	            <t> ScaledM = SF * DCTCP.BytesMarked / DCTCP.BytesSent </t>
+	            <t> ScaledM = SCF * DCTCP.BytesMarked / DCTCP.BytesSent </t>
 	          </list>
 	        </t>
 	        <t> Update the congestion estimate:
 	          <list style='none'>
-	            <t> if (DCTCP.Alpha >> SF) == 0 then DCTCP.Alpha = 0 </t>
+	            <t> if (DCTCP.Alpha >> SHF) == 0 then DCTCP.Alpha = 0 </t>
 	          </list>
 	          <list style='none'>
-	            <t> DCTCP.Alpha += (ScaledM >> SF) - (DCTCP.Alpha >> SF) </t>
+	            <t> DCTCP.Alpha += (ScaledM >> SHF) - (DCTCP.Alpha >> SHF) </t>
 	          </list>
 	          <list style='none'>
-	            <t> if DCTCP.Alpha > SF then DCTCP.Alpha = SF </t>
+	            <t> if DCTCP.Alpha > SCF then DCTCP.Alpha = SCF </t>
 	          </list>
 	        </t>
 	    </list>
