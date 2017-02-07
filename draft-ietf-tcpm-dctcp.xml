@@ -186,7 +186,7 @@
            </t>
            </list>
            Since the immediate ACK reflects the new DCTCP.CE state, it may acknowledge any previously unacknowledged packets in the old  
-           state. This can lead to an incorrect DCTCP.Alpha value computation at the sender per section <xref target="senderprocessing"/>. To avoid this, an  
+           state. This can lead to an incorrect DCTCP.Alpha value computation at the sender per <xref target="senderprocessing"/>. To avoid this, an  
            implementation may choose to send two ACKs, one for previously unacknowledged packets and another acknowledging the most recently received packet. 
         </t>
         <t> Receiver handling of the "Congestion Window Reduced" (CWR) bit is also per <xref target="RFC3168"/>
