@@ -34,20 +34,6 @@
         <email>sbens@microsoft.com</email>
       </address>
     </author>
-    <author initials='L.' surname='Eggert' fullname='Lars Eggert'>
-      <organization>NetApp</organization>
-      <address>
-        <postal>
-          <street>Sonnenallee 1</street>
-          <city>Kirchheim</city>
-          <code>85551</code>
-          <country>Germany</country>
-        </postal>
-        <phone>+49 151 120 55791</phone>
-        <email>lars@netapp.com</email>
-        <uri>http://eggert.org/</uri>
-      </address>
-    </author>
     <author initials='D.' surname='Thaler' fullname='Dave Thaler'>
       <organization>Microsoft</organization>
       <address>
@@ -60,6 +46,20 @@
       <address>
         <phone>+1 425 538 2782</phone>
         <email>pravb@microsoft.com</email>
+      </address>
+    </author>
+    <author initials='L.' surname='Eggert' fullname='Lars Eggert'>
+      <organization>NetApp</organization>
+      <address>
+        <postal>
+          <street>Sonnenallee 1</street>
+          <city>Kirchheim</city>
+          <code>85551</code>
+          <country>Germany</country>
+        </postal>
+        <phone>+49 151 120 55791</phone>
+        <email>lars@netapp.com</email>
+        <uri>http://eggert.org/</uri>
       </address>
     </author>
     <author initials='G.' surname='Judd' fullname='Glenn Judd'>
@@ -120,12 +120,13 @@
       <t> Datacenter TCP (DCTCP) improves traditional ECN processing by estimating the fraction of bytes that
       encounter congestion, rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion
       window based on this estimate. This method achieves high burst tolerance, low latency, and high throughput with
-      shallow-buffered switches.
+      shallow-buffered switches. DCTCP is a modification to the processing of ECN by a conventional TCP and requires that standard TCP 
+      congestion control be used for handling packet loss.
       </t>
       <t>
       It is recommended that DCTCP be only deployed in a datacenter environment where the endpoints and the switching fabric are under a single
-      administrative domain. This protocol is not meant for uncontrolled deployment in the global Internet. Refer to <xref target="deplissues"/> for 
-      more details.
+      administrative domain. DCTCP MUST NOT be deployed over the public Internet without additional measures, as detailed in 
+      <xref target="deplissues"/>.
       </t>
     </section>
 
@@ -212,7 +213,7 @@
 
       </section>
 
-      <section title='Processing Congestion Indications on the Sender' anchor='senderprocessing'>
+      <section title='Processing Echoed Congestion Indications on the Sender' anchor='senderprocessing'>
         <t> The sender estimates the fraction of bytes sent that encountered congestion. The current estimate is stored in a new
         TCP state variable, DCTCP.Alpha, which is initialized to 1 and SHOULD be updated as follows:
           <list>
@@ -283,12 +284,10 @@
                 <t> DCTCP.BytesAcked = DCTCP.BytesMarked = 0 </t>
               </list>
             </t>
-          </list>
-        </t>
-        <t> Rather than always halving the congestion window as described in <xref target="RFC3168"/>, when the sender receives an
-        indication of congestion (ECE), the sender SHOULD update cwnd as follows:
-          <list>
-            <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2)
+            <t> Rather than always halving the congestion window as described in <xref target="RFC3168"/>, the sender SHOULD update cwnd as follows:
+              <list style='none'>
+                <t> cwnd = cwnd * (1 - DCTCP.Alpha / 2) </t>                
+              </list>
             </t>
           </list>
         </t>
@@ -300,16 +299,19 @@
         window of data. The setting of the "Congestion Window Reduced" (CWR) bit is also as per <xref target="RFC3168"/>. This is required
         for interop with classic ECN receivers due to potential misconfigurations.
         </t>
-        <t> A DCTCP sender MUST deal with loss episodes in the same way as conventional TCP. In case of a timeout or
-        fast retransmit or any change in delay (for delay based congestion control), the cwnd and other state variables like ssthresh must be
-        changed in the same way that a conventional TCP would have changed them. 
+      </section>
+
+      <section title='Handling of packet loss'>
+        <t> A DCTCP sender MUST react to loss episodes in the same way as conventional TCP. For cases where the packet loss is inferred and not explicitly 
+        signaled by ECN, the cwnd and other state variables like ssthresh must be changed in the same way that a conventional TCP would have changed them. As with ECN, 
+        DCTCP sender will only reduce the cwnd once per window of data across all loss signals. Just as specified in <xref target="RFC5681"/>, upon a timeout, the cwnd 
+        MUST be set to no more than the loss window (1 full-sized segment), regardless of previous cwnd reductions in a given window of data. 
         </t>
       </section>
 
       <section title='Handling of SYN, SYN-ACK, RST Packets'>
-        <t> The switching fabric can drop TCP packets that do not have the ECT set in the IP header. If SYN and SYN-ACK packets for DCTCP 
-        connections do not have ECT set, they will be dropped with high probability. For DCTCP connections, the sender SHOULD set ECT for SYN, 
-        SYN-ACK and RST packets. 
+        <t> If SYN and SYN-ACK packets for DCTCP connections do not have ECT set in the IP header, they will likely be dropped by the switching fabric under load. 
+        For DCTCP connections, the sender SHOULD set ECT for SYN, SYN-ACK and RST packets. 
         </t>
       </section>
 
@@ -336,7 +338,8 @@
       <t> <xref target="RFC3168"/> forbids the ECN-marking of pure ACK packets, because of the inability of TCP to mitigate ACK-path congestion. 
       RFC 3168 also forbids ECN-marking of retransmissions, window probes and RSTs. However, dropping all these control packets - rather than ECN marking 
       them - has considerable performance disadvantages.  It is RECOMMENDED that an implementation provide a configuration knob that will cause ECT to be 
-      set on such control packes, which can be used in environments where such concerns do not apply.
+      set on such control packets, which can be used in environments where such concerns do not apply. See <xref target="ECN-EXPERIMENTATION"/> for 
+      details.
       </t> 
       <t> It would be useful to implement DCTCP as additional actions on top of an existing congestion control algorithm like NewReno. The DCTCP
       implementation MAY also allow configuration of resetting the value of DCTCP.Alpha as part of processing any loss episodes.
@@ -388,8 +391,8 @@
       infrastructure supports ECN. The switches may also support configuration of the congestion threshold used for marking.
       The proposed parameterization can be configured with switches that implement RED. <xref target='DCTCP10' /> provides a theoretical
       basis for selecting the congestion threshold, but as with the estimation gain, it may be more practical to rely on experimentation or
-      simply to use the default configuration of the device. DCTCP will degrade to loss-based congestion control when transiting a
-      congested drop-tail link.
+      simply to use the default configuration of the device. DCTCP will revert to loss-based congestion control when packet loss is experienced (e.g. when transiting a 
+      congested drop-tail link, or a link with an AQM drop behavior).
       </t>
       <t> DCTCP requires changes on both the sender and the receiver, so both endpoints must support DCTCP. Furthermore, DCTCP
       provides no mechanism for negotiating its use, so both endpoints must be configured through some out-of-band mechanism to
@@ -638,6 +641,15 @@
             <organization />
           </author>
           <date year="2013"/>
+        </front>
+      </reference>
+      <reference anchor="ECN-EXPERIMENTATION" target="https://datatracker.ietf.org/doc/draft-ietf-tsvwg-ecn-experimentation/">
+        <front>
+          <title>Explicit Congestion Notification (ECN) Experimentation</title>
+          <author initials="D." surname="Black">
+            <organization> Dell EMC </organization>
+          </author>
+          <date year="2017"/>
         </front>
       </reference>
     </references>
