@@ -17,7 +17,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-ietf-tcpm-dctcp-04" ipr="trust200902" category="info">
+<rfc docName="draft-ietf-tcpm-dctcp-05" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -310,8 +310,9 @@
       </section>
 
       <section title='Handling of SYN, SYN-ACK, RST Packets'>
-        <t> If SYN and SYN-ACK packets for DCTCP connections do not have ECT set in the IP header, they will likely be dropped by the switching fabric under load. 
-        For DCTCP connections, the sender SHOULD set ECT for SYN, SYN-ACK and RST packets. 
+        <t> If SYN , SYN-ACK and RST packets for DCTCP connections have ECT set in the IP header, they will receive the same treatment as other DCTCP packets 
+        when forwarded by a switching fabric under load. Lack of ECT in these packets may result in a higher drop rate depending on the switching fabric configuration. 
+        Hence for DCTCP connections, the sender SHOULD set ECT for SYN, SYN-ACK and RST packets. 
         </t>
       </section>
 
@@ -412,7 +413,7 @@
           </t>
           <t> If the estimation gain is small relative to the packet loss rate, the estimate may not be too inaccurate.
           </t>
-          <t> If packet loss mostly occurs under heavy congestion, most drops will occur during an unbroken string of CE packets,
+          <t> If ACK packet loss mostly occurs under heavy congestion, most drops will occur during an unbroken string of CE packets,
           and the estimate will be unaffected.
           </t>
         </list>
