@@ -329,9 +329,9 @@
       <t>Potential solutions rely on either configuration or heuristics. Heuristics need to allow endpoints to individually
       enable DCTCP, to ensure a DCTCP sender is always paired with a DCTCP receiver.
       One approach is to enable DCTCP based on the IP address of the remote endpoint. Another approach is to
-      detect connections that transmit within the bounds a datacenter. For example, Microsoft Windows Server 2012 (and later versions) supports automatic
-      selection of DCTCP if the estimated RTT is less than 10 msec and ECN is successfully negotiated, under the assumption that if the RTT is low, then
-      the two endpoints are likely in the same datacenter network.
+      detect connections that transmit within the bounds a datacenter. For example, an implementation could support automatic
+      selection of DCTCP if the estimated RTT is less than a threshold (like 10 msec) and ECN is successfully negotiated, under the assumption that if the 
+      RTT is low, then the two endpoints are likely in the same datacenter network.
       </t>
       <t> <xref target="RFC3168"/> forbids the ECN-marking of pure ACK packets, because of the inability of TCP to mitigate ACK-path congestion. 
       RFC 3168 also forbids ECN-marking of retransmissions, window probes and RSTs. However, dropping all these control packets - rather than ECN marking 
