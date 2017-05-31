@@ -81,7 +81,8 @@
       rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion window based on this
       estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches. This memo also
       discusses deployment issues related to the coexistence of DCTCP and conventional TCP, the lack of a negotiating mechanism between
-      sender and receiver, and presents some possible mitigations. This memo documents existing DCTCP implementations and deployment experience. 
+      sender and receiver, and presents some possible mitigations. This memo documents existing DCTCP implementations (<xref target="WINDOWS"/>, 
+      <xref target="LINUX"/>, <xref target="FREEBSD"/>) and deployment experience (<xref target="MORGANSTANLEY"/>). 
       DCTCP as described in this draft is applicable to deployments in controlled environments like datacenters but it must not be deployed 
       over the public Internet without additional measures, as detailed in <xref target="deplissues"/>.
       </t>
