@@ -81,9 +81,9 @@
       rather than simply detecting that some congestion has occurred. DCTCP then scales the TCP congestion window based on this
       estimate. This method achieves high burst tolerance, low latency, and high throughput with shallow-buffered switches. This memo also
       discusses deployment issues related to the coexistence of DCTCP and conventional TCP, the lack of a negotiating mechanism between
-      sender and receiver, and presents some possible mitigations. DCTCP as described in this draft is applicable to deployments in controlled 
-      environments like datacenters but it must not be deployed over the public Internet without additional measures, as detailed in 
-      <xref target="deplissues"/>.
+      sender and receiver, and presents some possible mitigations. This memo documents existing DCTCP implementations and deployment experience. 
+      DCTCP as described in this draft is applicable to deployments in controlled environments like datacenters but it must not be deployed 
+      over the public Internet without additional measures, as detailed in <xref target="deplissues"/>.
       </t>
     </abstract>
   </front>
@@ -156,6 +156,7 @@
         For example, the switches may be configured with a congestion threshold. When a packet arrives at a switch and
         its queue length is greater than the congestion threshold, the switch sets the CE codepoint in the packet.
         For example, Section 3.4 of <xref target="DCTCP10"/> suggests threshold marking with a threshold K > (RTT * C)/7, where C is the link rate in packets per second.
+        In typical deployments the marking threshold is set to be a small value to maintain a short average queueing delay. 
         However, the actual algorithm for marking congestion is an implementation detail of the switch and will generally not be
         known to the sender and receiver. Therefore, sender and receiver should not assume that a particular
         marking algorithm is implemented by the switching fabric.
@@ -536,7 +537,7 @@
             </address>
           </author>
           <author initials="M." surname="Sridharan" fullname="Murari Sridharan">
-            <organization abbrev="MSR"> Microsoft Research </organization>
+            <organization abbrev="MSFT"> Microsoft </organization>
             <address>
               <email> muraris@microsoft.com </email>
             </address>
@@ -603,6 +604,15 @@
         </front>
         <seriesInfo name="DOI" value="10.1145/1993744.1993753"/>
         <seriesInfo name="" value="Proc. ACM SIGMETRICS Joint International Conference on Measurement and Modeling of Computer Systems (SIGMETRICS 11)"/>
+      </reference>
+      <reference anchor="WINDOWS" target="https://technet.microsoft.com/en-us/library/hh997028(v=ws.11).aspx">
+        <front>
+          <title>Windows DCTCP reference</title>
+          <author>
+            <organization abbrev="MSFT"> Microsoft </organization>
+          </author>
+          <date year="2012"/>
+        </front>
       </reference>
       <reference anchor="LINUX" target="https://git.kernel.org/cgit/linux/kernel/git/davem/net-next.git/commit/?id=e3118e8359bb7c59555aca60c725106e6d78c5ce">
         <front>
