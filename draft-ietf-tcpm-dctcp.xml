@@ -7,7 +7,8 @@
   <!ENTITY rfc5562 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5562.xml">
   <!ENTITY rfc5681 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
   <!ENTITY rfc7942 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml">
-  <!ENTITY rfc6582 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6582.xml">
+  <!ENTITY rfc5033 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5033.xml">
+    <!-- <!ENTITY rfc6582 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6582.xml"> -->
 ]>
 <?rfc toc='yes' ?>
 <?rfc symrefs='yes' ?>
@@ -128,6 +129,10 @@
       DCTCP should only be deployed in an intra-datacenter environment where both endpoints and the switching fabric are under a single
       administrative domain. DCTCP MUST NOT be deployed over the public Internet without additional measures, as detailed in 
       <xref target="deplissues"/>.
+      </t>
+
+      <t>
+        The objective of this Informational RFC is to document DCTCP as an alternative TCP congestion control algorithm <xref target="RFC5033"/> that is known to be widely implemented and deployed. It is consensus in the IETF TCPM working group that a DCTCP standard would require further work. A precise documentation of running code enables follow-up IETF Experimental or Standards Track RFCs.
       </t>
     </section>
 
@@ -343,7 +348,7 @@
       set on such control packets, which can be used in environments where such concerns do not apply. See <xref target="ECN-EXPERIMENTATION"/> for 
       details.
       </t> 
-      <t> It is useful to implement DCTCP as additional actions on top of an existing congestion control algorithm like NewReno <xref target="RFC6582"/>. The DCTCP
+      <t> It is useful to implement DCTCP as additional actions on top of an existing congestion control algorithm like Reno <xref target="RFC5681"/>. The DCTCP
       implementation MAY also allow configuration of resetting the value of DCTCP.Alpha as part of processing any loss episodes.
       </t>
       </section>
@@ -447,8 +452,11 @@
     </section>
 
     <section title='Security Considerations'>
-      <t> DCTCP enhances ECN and thus inherits the security considerations discussed in <xref target="RFC3168"/>. The processing
-      changes introduced by DCTCP do not exacerbate these considerations or introduce new ones. In particular, with either
+      <t> DCTCP enhances ECN and thus inherits the general security considerations discussed in <xref target="RFC3168"/>, although additional mitigation options exist due to the limited intra-datacenter deployment of DCTCP.
+</t>
+      <t> 
+      The processing
+      changes introduced by DCTCP do not exacerbate the considerations in <xref target="RFC3168"/> or introduce new ones. In particular, with either
       algorithm, the network infrastructure or the remote endpoint can falsely report congestion and thus cause the sender to
       reduce cwnd. However, this is no worse than what can be achieved by simply dropping packets.
       </t>
@@ -502,7 +510,8 @@
 
     <references title='Informative References'>
       &rfc7942;
-      &rfc6582;
+      &rfc5033;
+      <!-- &rfc6582; -->
       <reference anchor='DCTCP10' target='http://dl.acm.org/citation.cfm?doid=1851182.1851192'>
         <front>
           <title>Data Center TCP (DCTCP)</title>
