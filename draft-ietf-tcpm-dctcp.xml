@@ -20,7 +20,7 @@
 <!-- <?rfc-ext parse-xml-in-artwork='yes' ?> -->
 <!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?> -->
 
-<rfc docName="draft-ietf-tcpm-dctcp-09" ipr="trust200902" category="info">
+<rfc docName="draft-ietf-tcpm-dctcp-10" ipr="trust200902" category="info">
   <front>
     <title abbrev='DCTCP'>Datacenter&nbsp;TCP&nbsp;(DCTCP): TCP&nbsp;Congestion&nbsp;Control&nbsp;for&nbsp;Datacenters</title>
     <author initials='S.' surname='Bensley' fullname='Stephen Bensley'>
@@ -317,10 +317,16 @@ to begin; initialized to
         </t>
       </section>
 
+      <section title='Handling of congestion window growth'>
+        <t> A DCTCP sender grows its congestion window in the same way as conventional TCP. Slow start and congestion avoidance algorithms are 
+        handled just as specified in <xref target="RFC5681"/>. 
+        </t>
+      </section>
+
       <section title='Handling of packet loss'>
-        <t> A DCTCP sender MUST react to loss episodes in the same way as conventional TCP. For cases where the packet loss is inferred and not explicitly 
-        signaled by ECN, the cwnd and other state variables like ssthresh MUST be changed in the same way that a conventional TCP would have changed them. As with ECN, 
-        DCTCP sender will only reduce the cwnd once per window of data across all loss signals. Just as specified in <xref target="RFC5681"/>, upon a timeout, the cwnd 
+        <t> A DCTCP sender MUST react to loss episodes in the same way as conventional TCP including fast retransmit and fast recovery algorithms just as specified in <xref target="RFC5681"/>. 
+        For cases where the packet loss is inferred and not explicitly signaled by ECN, the cwnd and other state variables like ssthresh MUST be changed in the same way that a conventional TCP 
+        would have changed them. As with ECN, DCTCP sender will only reduce the cwnd once per window of data across all loss signals. Just as specified in <xref target="RFC5681"/>, upon a timeout, the cwnd 
         MUST be set to no more than the loss window (1 full-sized segment), regardless of previous cwnd reductions in a given window of data. 
         </t>
       </section>
