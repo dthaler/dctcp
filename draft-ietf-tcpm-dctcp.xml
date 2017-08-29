@@ -260,7 +260,7 @@ to begin; initialized to
             </t>
           </list>
         </t>
-        <t> The congestion estimator on the sender SHOULD process acceptable ACKs as follows:
+        <t> The congestion estimator on the sender MUST process acceptable ACKs as follows:
           <list style='numbers'>
             <t> Compute the bytes acknowledged (TCP SACK options <xref target="RFC2018"/> are ignored for this computation):
               <list style='none'>
@@ -306,10 +306,6 @@ to begin; initialized to
               </list>
             </t>
           </list>
-        </t>
-        <t> Thus, when no bytes sent experienced congestion, DCTCP.Alpha equals zero, and cwnd is left unchanged. When all sent
-        bytes experienced congestion, DCTCP.Alpha equals one, and cwnd is reduced by half. Lower levels of congestion will result
-        in correspondingly smaller reductions to cwnd.
         </t>
         <t> Just as specified in <xref target="RFC3168"/>, DCTCP does not react to congestion indications more than once for every
         window of data. The setting of the "Congestion Window Reduced" (CWR) bit is also as per <xref target="RFC3168"/>. This is required
